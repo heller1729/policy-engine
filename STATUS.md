@@ -86,6 +86,7 @@ Prototype v0.1 is working: seven demo scenarios, 22 passing tests, audit log, sw
 ### Oct 6, 2026
 * Added CLAUDE.md (full project context), STATUS.md, docs folder, .gitignore.
 * Decided: code moves to a GitHub repo and Claude Code; docs and notes stay in the claude.ai CCI project; one session per task.
+* Created the private GitHub repo heller1729/policy-engine and pushed v0.1 (22 tests passing).
 
 ### Oct 5, 2026
 * Built prototype v0.1. Policy file hand written from the spreadsheet and proposal.
