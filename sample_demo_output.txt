@@ -1,0 +1,120 @@
+==============================================================================
+1. Mecca case: advertiser asks for device level Mecca visits
+  Request: tier Lv 6, commercial, saudi_arabia, advertising, G1, area Mecca
+  Rules fired:
+   * location_group  LOC_G1                             -> Blocked [G1]
+   * audience_matrix AUD_SENSITIVE_INFERENCE_COMMERCIAL -> Blocked [D1]
+     jurisdiction    SA_LOCALIZATION                    -> Aggregate [D2]
+   * purpose         ADS_NO_RED_LOCATION_TARGETING      -> Blocked [B3]
+  DECISION: Blocked
+  Because: GDPR Art 9(1); Thailand PDPA; Japan APPI; Saudi PDPL (religion and health named sensitive)
+  Released rows: 0
+==============================================================================
+2. Tourism ministry asks for Mecca visitor counts by home country
+  Request: tier Lv 2, government, saudi_arabia, tourism, G1, area Mecca
+  Rules fired:
+   * location_group  LOC_G1                             -> Aggregate [G1]
+     audience_matrix AUD_AREA_STATISTICS_GOVERNMENT     -> Full [D1]
+  DECISION: Aggregate
+  Because: GDPR Art 9(1); Thailand PDPA; Japan APPI; Saudi PDPL (religion and health named sensitive)
+  Enforcement:
+     aggregate_h3           [E1, E4]  rows 2373 -> 65
+     suppress_small_cells   [E3]  rows 65 -> 56
+  Released rows: 56
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'EGY', 'unique_devices': 27}
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'GBR', 'unique_devices': 10}
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'IDN', 'unique_devices': 55}
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'IND', 'unique_devices': 28}
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'NGA', 'unique_devices': 12}
+      {'h3_cell': '8753a9216ffffff', 'date': '2025-12-01', 'home_country': 'PAK', 'unique_devices': 40}
+      ... 50 more
+==============================================================================
+3. Advertiser asks for visit history at Dubai malls
+  Request: tier Lv 5, commercial, uae, advertising, G5, area Dubai
+  Rules fired:
+     location_group  LOC_G5                             -> Full [G5]
+   * audience_matrix AUD_DEVICE_LOGS_COMMERCIAL         -> Masked [D1]
+  DECISION: Masked
+  Because: Who sees what proposal, first cut matrix
+  Enforcement:
+     hash_ids               [A2]  rows 1702 -> 1702
+     drop_sensitive_rows    [B2, B3]  rows 1702 -> 854
+     coarsen_time           [E2]  rows 854 -> 854
+  Released rows: 854
+      {'device_id': 'h_b874d4ea2b8f0036', 'home_country': 'GBR', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a13686fffff', 'date': '2025-12-02'}
+      {'device_id': 'h_783ba8efabbb1d3c', 'home_country': 'ARE', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a13686fffff', 'date': '2025-12-03'}
+      {'device_id': 'h_e46dc543d72bdab9', 'home_country': 'PAK', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a13686fffff', 'date': '2025-12-01'}
+      {'device_id': 'h_9bf887b807ff8ac4', 'home_country': 'ARE', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a136bd3ffff', 'date': '2025-12-02'}
+      {'device_id': 'h_9bf887b807ff8ac4', 'home_country': 'ARE', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a13686fffff', 'date': '2025-12-02'}
+      {'device_id': 'h_ee34882a0c838e0c', 'home_country': 'IND', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a136bd7ffff', 'date': '2025-12-05'}
+      ... 848 more
+==============================================================================
+4. Same advertiser request, but in Thailand
+  Request: tier Lv 5, commercial, thailand, advertising, G5, area Bangkok
+  Rules fired:
+     location_group  LOC_G5                             -> Full [G5]
+     audience_matrix AUD_DEVICE_LOGS_COMMERCIAL         -> Masked [D1]
+   * jurisdiction    TH_ADID_DEVICE_LEVEL               -> Aggregate [A2] (review)
+  Note: k for Thailand (PDPA) still to be confirmed with counsel
+  DECISION: Aggregate  (flagged for human review)
+  Because: Thailand PDPA: device and ad IDs are personal data; consent is the primary lawful basis (Tilleke & Gibbins 2026)
+  Enforcement:
+     aggregate_h3           [E1, E4]  rows 1544 -> 123
+     suppress_small_cells   [E3]  rows 123 -> 68
+  Released rows: 68
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-01', 'home_country': 'CHN', 'unique_devices': 5}
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-01', 'home_country': 'THA', 'unique_devices': 17}
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'CHN', 'unique_devices': 6}
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'JPN', 'unique_devices': 5}
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'THA', 'unique_devices': 17}
+      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-03', 'home_country': 'THA', 'unique_devices': 14}
+      ... 62 more
+==============================================================================
+5. Internal team, cybersecurity, raw data near a defence site
+  Request: tier Lv 7, internal, saudi_arabia, cybersecurity, G4, area Riyadh
+  Rules fired:
+   * location_group  LOC_G4                             -> Aggregate [G4]
+     audience_matrix AUD_DIRECT_IDENTIFIERS_INTERNAL    -> Full [D1]
+  DECISION: Aggregate
+  Because: Strava heatmap exposure of military bases (2018); critical infrastructure protection rules
+  Enforcement:
+     aggregate_h3           [E1, E4]  rows 2517 -> 255
+     suppress_small_cells   [E3]  rows 255 -> 117
+  Released rows: 117
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'EGY', 'unique_devices': 7}
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'IND', 'unique_devices': 13}
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'PAK', 'unique_devices': 5}
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'SAU', 'unique_devices': 63}
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-02', 'home_country': 'EGY', 'unique_devices': 9}
+      {'h3_cell': '875355d30ffffff', 'date': '2025-12-02', 'home_country': 'GBR', 'unique_devices': 6}
+      ... 111 more
+==============================================================================
+6. Research partner asks for movement trends in Doha
+  Request: tier Lv 3, research, qatar, tourism, G5, area Doha
+  Rules fired:
+     location_group  LOC_G5                             -> Full [G5]
+   * audience_matrix AUD_BEHAVIORAL_TRENDS_RESEARCH     -> Aggregate [D1]
+  DECISION: Aggregate
+  Because: Who sees what proposal, first cut matrix
+  Enforcement:
+     aggregate_h3           [E1, E4]  rows 829 -> 66
+     suppress_small_cells   [E3]  rows 66 -> 37
+  Released rows: 37
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-01', 'home_country': 'IND', 'unique_devices': 8}
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-01', 'home_country': 'QAT', 'unique_devices': 6}
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-02', 'home_country': 'QAT', 'unique_devices': 6}
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-03', 'home_country': 'QAT', 'unique_devices': 6}
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-05', 'home_country': 'QAT', 'unique_devices': 5}
+      {'h3_cell': '87536bcaaffffff', 'date': '2025-12-06', 'home_country': 'QAT', 'unique_devices': 7}
+      ... 31 more
+==============================================================================
+7. Request from a country with no rules yet
+  Request: tier Lv 2, government, brazil, tourism, G5, area Riyadh
+  Rules fired:
+   * validate        UNKNOWN_ATTRIBUTE                  -> Blocked
+  Note: Unknown jurisdiction 'brazil', no rules exist, failing safe
+  DECISION: Blocked
+  Because: Unknown jurisdiction 'brazil', no rules exist, failing safe
+  Released rows: 0
+==============================================================================
+Audit log written to out/audit.jsonl

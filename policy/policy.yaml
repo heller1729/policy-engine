@@ -1,0 +1,204 @@
+# Privacy policy engine: policy file v0.1
+#
+# Human readable source of truth: Regional_Adaptation_Layer.xlsx and the
+# Who sees what proposal. Each rule carries the factor ID and the source it
+# came from so the audit log can cite it.
+
+version: "0.1"
+
+# Strictness order, least to most restrictive. Most restrictive wins.
+decisions: [Full, Masked, Aggregate, Blocked]
+
+# Tiers at or above this level are device level data.
+device_level_from_tier: 4
+
+requesters: [public, commercial, internal, government, research]
+purposes: [tourism, cybersecurity, advertising]
+
+thresholds:
+  k_default: 5
+  h3_resolution: 7
+
+# Step 1. Location group rules (Sensitive locations tab)
+location_groups:
+  G1:
+    name: Directly revealing
+    device_level: Blocked
+    aggregate: Aggregate
+    factor: G1
+    citation: "GDPR Art 9(1); Thailand PDPA; Japan APPI; Saudi PDPL (religion and health named sensitive)"
+  G2:
+    name: Revealing by inference
+    device_level: Blocked
+    aggregate: Aggregate
+    factor: G2
+    citation: "CJEU C-252/21 Meta v Bundeskartellamt (2023); CJEU C-21/23 Lindenapotheke (2024)"
+  G3:
+    name: Vulnerable population present
+    device_level: Aggregate
+    aggregate: Aggregate
+    factor: G3
+    citation: "GDPR Art 8 and Recital 38; UK Age Appropriate Design Code; US COPPA; UN CRC"
+  G4:
+    name: Security sensitive
+    device_level: Aggregate
+    aggregate: Aggregate
+    factor: G4
+    citation: "Strava heatmap exposure of military bases (2018); critical infrastructure protection rules"
+  G5:
+    name: Everyday place
+    device_level: Full
+    aggregate: Full
+    factor: G5
+    citation: "No special basis"
+
+# Step 2. Audience matrix (Who sees what proposal, first cut)
+audience_matrix:
+  factor: D1
+  citation: "Who sees what proposal, first cut matrix"
+  bands:
+    - tiers: [1, 2]
+      label: Area statistics
+      public: Full
+      commercial: Full
+      internal: Full
+      government: Full
+      research: Full
+    - tiers: [3]
+      label: Behavioral trends
+      public: Aggregate
+      commercial: Aggregate
+      internal: Full
+      government: Full
+      research: Aggregate
+    - tiers: [4, 5]
+      label: Device logs
+      public: Blocked
+      commercial: Masked
+      internal: Full
+      government: Masked
+      research: Masked
+    - tiers: [6]
+      label: Sensitive inference
+      public: Blocked
+      commercial: Blocked
+      internal: Masked
+      government: Aggregate
+      research: Aggregate
+    - tiers: [7]
+      label: Direct identifiers
+      public: Blocked
+      commercial: Blocked
+      internal: Full
+      government: Blocked
+      research: Blocked
+
+# Step 3. Jurisdiction overrides (Regional overrides and Ad ID tabs)
+# A rule fires when every listed condition matches. Rules can only tighten.
+# review: true marks a grey area (turns on legal interpretation).
+jurisdictions:
+  thailand:
+    label: Thailand (PDPA)
+    k: 5
+    k_review: true
+    group_shift: {G2: G1}
+    rules:
+      - id: TH_ADID_DEVICE_LEVEL
+        when: {tier_min: 4, requester_not: [internal]}
+        cap: Aggregate
+        review: true
+        factor: A2
+        citation: "Thailand PDPA: device and ad IDs are personal data; consent is the primary lawful basis (Tilleke & Gibbins 2026)"
+  us:
+    label: United States (state laws)
+    k: 5
+    rules:
+      - id: US_SENSITIVE_GEOFENCE_ADS
+        when: {purpose_in: [advertising], group_in: [G1, G2]}
+        cap: Blocked
+        factor: B3
+        citation: "CPRA and state laws: precise geolocation is sensitive; geofencing near healthcare banned in several states"
+  saudi_arabia:
+    label: Saudi Arabia (PDPL)
+    k: 5
+    group_shift: {G2: G1}
+    rules:
+      - id: SA_LOCALIZATION
+        when: {tier_min: 4, requester_not: [internal]}
+        cap: Aggregate
+        factor: D2
+        citation: "Saudi PDPL and Data Transfer Regulation: localization for sensitive and personal data unless exempt"
+  uae:
+    label: UAE (PDPL)
+    k: 5
+    rules: []
+  qatar:
+    label: Qatar (PDPPL)
+    k: 5
+    rules: []
+  eu:
+    label: EU (GDPR)
+    k: 5
+    rules:
+      - id: EU_ART9_DEVICE_LEVEL
+        when: {tier_min: 4, group_in: [G1, G2], requester_not: [internal]}
+        cap: Blocked
+        factor: B3
+        citation: "GDPR Art 9; CJEU C-252/21 (inferred special category)"
+  uk:
+    label: UK (UK GDPR + DPA 2018)
+    k: 5
+    rules:
+      - id: UK_ART9_DEVICE_LEVEL
+        when: {tier_min: 4, group_in: [G1, G2], requester_not: [internal]}
+        cap: Blocked
+        factor: B3
+        citation: "UK GDPR Art 9 (retained)"
+  japan:
+    label: Japan (APPI)
+    k: 5
+    rules:
+      - id: JP_THIRD_PARTY_PROVISION
+        when: {tier_min: 4, requester_in: [commercial, research]}
+        cap: Aggregate
+        review: true
+        factor: A6
+        citation: "APPI: third party provision of personally referable information needs consent confirmation"
+
+# Step 4. Purpose rules (Application areas tab). Purpose can only tighten.
+purpose_rules:
+  - id: ADS_NO_VULNERABLE_TARGETING
+    when: {purpose_in: [advertising], group_in: [G3]}
+    cap: Blocked
+    factor: G3
+    citation: "GDPR Art 8; UK AADC; US COPPA: no targeting or profiling of children"
+  - id: ADS_NO_SECURITY_SITES
+    when: {purpose_in: [advertising], group_in: [G4]}
+    cap: Blocked
+    factor: G4
+    citation: "Sensitive locations tab: G4 aggregate only or excluded"
+  - id: ADS_NO_RED_LOCATION_TARGETING
+    when: {purpose_in: [advertising], group_in: [G1, G2]}
+    cap: Blocked
+    factor: B3
+    citation: "Ad ID tab: do not link an ad ID to a religious or medical site"
+
+# Enforcement. Each decision maps to a plan of technique modules, run in order.
+# Swapping a technique is a policy edit, not a code change.
+techniques:
+  plans:
+    Full: []
+    Masked: [hash_ids, drop_sensitive_rows, coarsen_time]
+    Aggregate: [aggregate_h3, suppress_small_cells]
+    Blocked: []
+  # Tiers 1 to 3 are aggregate products, so even Full returns counts above k.
+  aggregate_product_plan: [aggregate_h3, suppress_small_cells]
+  # Optional modules, added after the plan when enabled.
+  optional:
+    laplace_noise:
+      enabled: false
+      applies_to: [Aggregate]
+      epsilon: 1.0
+  settings:
+    hash_salt_env: POLICY_ENGINE_SALT
+    sensitive_groups: [G1, G2]
