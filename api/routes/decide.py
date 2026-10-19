@@ -6,7 +6,7 @@ from engine import DecisionPoint, EnforcementPoint, Request
 from ..schemas import CellCount, DecisionOut, MapOut, ReleasedPage, RequestIn, RuleHitOut, RunOut, StepOut
 from ..state import EngineState, get_state
 
-router = APIRouter()
+router = APIRouter(tags=["Decide and run"])
 
 
 def to_request(body: RequestIn) -> Request:

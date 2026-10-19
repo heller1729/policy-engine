@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from scenarios import SCENARIOS
 from ..schemas import ScenarioOut
 
-router = APIRouter()
+router = APIRouter(tags=["Scenarios"])
 
 
 @router.get("/scenarios", response_model=list[ScenarioOut])

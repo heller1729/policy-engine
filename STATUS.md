@@ -87,6 +87,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 ### Oct 19, 2026
 * Done: wrote `docs/UI_Plan.md` (v0.2: FastAPI around the engine, React web app, mock data). Built step 1: `api/` with policy, scenarios, decide, request, matrix, audit, data and techniques endpoints; `scenarios.py` shared by demo, API and tests; `EnforcementPoint.run(trace=True)`; `Policy.with_overrides` (tighten only); tier names in policy.yaml; `serve.py`. 44 tests passing (22 engine, 22 API). Demo output unchanged.
 * Decided: React over Streamlit. No approve button for grey areas. IAB (Oct 8) went well; no deadline for v0.2, present as work in progress. Docker image later.
+* Also: added the `policyengenv` virtual environment to setup docs; Pratham ran the tests (44 pass) and the server locally; API docs grouped by tag.
 * Next: step 2, web skeleton and request builder with live decision and pipeline view.
 
 ### Oct 6, 2026

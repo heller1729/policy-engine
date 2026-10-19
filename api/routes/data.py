@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends
 
 from ..state import EngineState, get_state
 
-router = APIRouter()
+router = APIRouter(tags=["Synthetic data"])
 
 
-@router.get("/data/summary")
+@router.get("/data/summary", response_model=dict)
 def summary(state: EngineState = Depends(get_state)):
     """Shape of the synthetic dataset. Counts only, no device rows."""
     rows = state.data
