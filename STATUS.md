@@ -83,6 +83,11 @@ Prototype v0.1 is working: seven demo scenarios, 22 passing tests, audit log, sw
 
 ## Session log
 
+### Oct 19, 2026
+* Done: wrote `docs/UI_Plan.md`, the plan for v0.2 (FastAPI around the engine, React web app, mock data).
+* Decided: React over Streamlit; engine behavior unchanged; no approve button for grey areas.
+* Next: confirm IAB date and whether LocationMind will run it, then start build step 1 (API layer).
+
 ### Oct 6, 2026
 * Added CLAUDE.md (full project context), STATUS.md, docs folder, .gitignore.
 * Decided: code moves to a GitHub repo and Claude Code; docs and notes stay in the claude.ai CCI project; one session per task.
