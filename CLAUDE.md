@@ -408,7 +408,9 @@ Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tigh
 | Policy_Engine_Design.md | One page design doc |
 | Policy_Engine_Design_Notes.md | Speaking notes for the design doc |
 | Architecture_Diagram_Notes.md | Speaking notes walking the board Step 1 to 7 |
-| Prototype_Demo_Notes.md | Speaking notes for a live code demo |
+| Prototype_Demo_Notes.md | Speaking notes for a live code demo (v0.1, terminal) |
+| UI_Walkthrough_Notes.md | Speaking notes for presenting the v0.2 web app: every page, Mecca, Dubai and Thailand scenarios, numbers from `serve.py --city`, likely questions |
+| UI_Plan.md | v0.2 plan, now done |
 | Policy_Engine_Legend.png | Legend image for the board |
 | Who_Sees_What_Proposal.md | Audience matrix proposal |
 | Regional_Adaptation_Layer.xlsx | Eight jurisdiction spreadsheet |
