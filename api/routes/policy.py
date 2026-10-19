@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
 from engine import techniques
-from ..schemas import CatalogOut, PolicyOut, TechniqueOut
+from engine.techniques import REGISTRY
+from ..schemas import CatalogOut, PolicyOut, TechniqueOut, TechniqueSampleOut
 from ..state import EngineState, get_state
 
 router = APIRouter(tags=["Policy"])
@@ -66,3 +67,49 @@ def technique_list(state: EngineState = Depends(get_state)):
         TechniqueOut(name=name, factor=cls.factor, description=cls.description, used_in=used.get(name, []))
         for name, cls in techniques.REGISTRY.items()
     ]
+
+
+SAMPLE_AREA = "Riyadh"
+SHOWN = 6
+
+
+def _show(rows):
+    return [{k: v for k, v in r.items() if k not in ("lat", "lng")} for r in rows[:SHOWN]]
+
+
+def _sample_rows(data):
+    """A few Riyadh rows with every location group present, so drops are visible."""
+    rows = [r for r in data if r["area"] == SAMPLE_AREA]
+    picked, seen = [], set()
+    for r in rows:
+        if r["place_group"] not in seen:
+            picked.append(r)
+            seen.add(r["place_group"])
+    return picked + [r for r in rows if r not in picked][: SHOWN - len(picked)]
+
+
+@router.get("/techniques/samples", response_model=list[TechniqueSampleOut])
+def technique_samples(state: EngineState = Depends(get_state)):
+    """Each registered technique applied to synthetic rows, before and after."""
+    p = state.policy
+    ctx = {"k": p.thresholds["k_default"], "h3_resolution": p.thresholds.get("h3_resolution", 7),
+           "salt": "demo-salt", "seed": state.noise_seed}
+    device_rows = _sample_rows(state.data)
+    area_rows = [r for r in state.data if r["area"] == SAMPLE_AREA]
+    aggregated = techniques.build("aggregate_h3", p).apply(area_rows, ctx)
+    suppressed = techniques.build("suppress_small_cells", p).apply(aggregated, ctx)
+    inputs = {"aggregate_h3": area_rows, "suppress_small_cells": aggregated, "laplace_noise": suppressed}
+
+    out = []
+    for name, cls in REGISTRY.items():
+        rows = inputs.get(name, device_rows)
+        result = techniques.build(name, p).apply(rows, ctx)
+        if name == "suppress_small_cells":
+            kept = {(r["h3_cell"], r["date"], r["home_country"]) for r in result}
+            before = sorted(rows, key=lambda r: (r["h3_cell"], r["date"], r["home_country"]) in kept)
+        else:
+            before = rows
+        out.append(TechniqueSampleOut(name=name, factor=cls.factor, description=cls.description,
+                                      rows_in=len(rows), rows_out=len(result),
+                                      before=_show(before), after=_show(result)))
+    return out

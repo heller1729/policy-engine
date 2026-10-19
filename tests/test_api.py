@@ -168,3 +168,13 @@ def test_catalog_endpoint(client):
     assert c["strictness"][0] == "G1" and c["outside_group"] == "G5"
     assert {p["area"] for p in c["places"]} >= {"Mecca", "New York", "London", "Paris", "Tokyo"}
     assert all(p["group"] in {"G1", "G2", "G3", "G4"} for p in c["places"])
+
+
+def test_technique_samples(client):
+    samples = {t["name"]: t for t in client.get("/api/techniques/samples").json()}
+    assert set(samples) >= {"hash_ids", "drop_sensitive_rows", "coarsen_time", "aggregate_h3", "suppress_small_cells"}
+    assert all(r["device_id"].startswith("h_") for r in samples["hash_ids"]["after"])
+    assert all(r["place_group"] not in ("G1", "G2", "G3", "G4") for r in samples["drop_sensitive_rows"]["after"])
+    assert all("hour" not in r for r in samples["coarsen_time"]["after"])
+    assert samples["suppress_small_cells"]["rows_out"] < samples["suppress_small_cells"]["rows_in"]
+    assert all("lat" not in r for t in samples.values() for r in t["before"] + t["after"])

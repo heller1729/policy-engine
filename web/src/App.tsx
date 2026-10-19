@@ -1,13 +1,19 @@
 import { ExternalLink } from "lucide-react";
 import { NavLink, Route, Routes } from "react-router-dom";
+import { AuditPage } from "./pages/AuditPage";
 import { PolicyPage } from "./pages/PolicyPage";
+import { PresentPage } from "./pages/PresentPage";
 import { RequestBuilder } from "./pages/RequestBuilder";
+import { TechniquesPage } from "./pages/TechniquesPage";
 import { WhoSeesWhat } from "./pages/WhoSeesWhat";
 
 const NAV = [
   { to: "/", label: "Request builder" },
   { to: "/matrix", label: "Who sees what" },
   { to: "/policy", label: "Policy" },
+  { to: "/techniques", label: "Techniques" },
+  { to: "/audit", label: "Audit log" },
+  { to: "/present", label: "Present" },
 ];
 
 export function App() {
@@ -48,6 +54,9 @@ export function App() {
         <Routes>
           <Route path="/matrix" element={<WhoSeesWhat />} />
           <Route path="/policy" element={<PolicyPage />} />
+          <Route path="/techniques" element={<TechniquesPage />} />
+          <Route path="/audit" element={<AuditPage />} />
+          <Route path="/present" element={<PresentPage />} />
           <Route path="*" element={<RequestBuilder />} />
         </Routes>
       </main>

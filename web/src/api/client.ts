@@ -19,6 +19,8 @@ export type MatrixResult = Schemas["MatrixOut"];
 export type MatrixCell = Schemas["MatrixCell"];
 export type Catalog = Schemas["CatalogOut"];
 export type Rule = Schemas["RuleOut"];
+export type TechniqueSample = Schemas["TechniqueSampleOut"];
+export type AuditList = Schemas["AuditListOut"];
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {

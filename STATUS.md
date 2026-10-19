@@ -1,6 +1,6 @@
 # STATUS
 
-Last updated: Oct 6, 2026
+Last updated: Oct 19, 2026
 
 Read `CLAUDE.md` first for standing context. This file is the running log. At the end of each session, add an entry under Session log, update the lists below, and commit.
 
@@ -8,22 +8,24 @@ Read `CLAUDE.md` first for standing context. This file is the running log. At th
 
 ## Where things stand
 
-Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API plus web UI, mock data) is in progress; the API and the request builder with run results and map are done. 13 demo scenarios across nine cities and all eight jurisdictions, 58 passing tests, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
+Prototype v0.1 was shown at the IAB meeting on Oct 8. v0.2 is done: FastAPI around the engine and a React web app (request builder with maps, who sees what, policy, techniques, audit log, present mode), on synthetic data for nine cities and all eight jurisdictions. 13 demo scenarios, 61 Python tests plus a Playwright smoke test, place check per row, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
 
 ---
 
 ## Next up (in priority order)
 
-1. Read Dr. Matsuo's papers on privacy and encryption techniques when they arrive, and list which techniques to support first.
-2. Design how the engine chooses a technique: per decision only today; consider per jurisdiction, requester, and purpose ("technique profiles"). Write it up before coding.
-3. Add the first new technique modules with tests. Candidates to check against the papers: l diversity or t closeness on top of k, spatial cloaking or geo indistinguishability, user level differential privacy with a privacy budget, secure aggregation or secure multiparty computation, homomorphic encryption, synthetic data generation, salt rotation for hashed IDs.
-4. Revise the Whimsical architecture board to show technique selection.
-5. Fix the order of noise and suppression, and handle unit of privacy (E6, user level).
-6. Fix the Saudi "agrees" line in `docs/Policy_Engine_Design.md`.
-7. Add a destination attribute for cross border transfers (D2).
-8. Replace the synthetic place catalog with LocationMind's real place list (polygons or H3 cells), and confirm the buffer size with counsel.
-9. Make the Regional overrides tab machine readable and generate `policy.yaml` from it.
-10. Connect to real data in Snowflake once access is granted.
+1. Present v0.2 to Dr. Matsuo (present mode, `python serve.py --city` for fuller maps) and collect feedback.
+2. Read Dr. Matsuo's papers on privacy and encryption techniques when they arrive, and list which techniques to support first.
+3. Design how the engine chooses a technique: per decision only today; consider per jurisdiction, requester, and purpose ("technique profiles"). Write it up before coding.
+4. Add the first new technique modules with tests. Candidates to check against the papers: l diversity or t closeness on top of k, spatial cloaking or geo indistinguishability, user level differential privacy with a privacy budget, secure aggregation or secure multiparty computation, homomorphic encryption, synthetic data generation, salt rotation for hashed IDs.
+5. Revise the Whimsical architecture board to show technique selection.
+6. Fix the order of noise and suppression, and handle unit of privacy (E6, user level).
+7. Fix the Saudi "agrees" line in `docs/Policy_Engine_Design.md`.
+8. Add a destination attribute for cross border transfers (D2).
+9. Replace the synthetic place catalog with LocationMind's real place list (polygons or H3 cells), and confirm the buffer size with counsel.
+10. Make the Regional overrides tab machine readable and generate `policy.yaml` from it.
+11. Docker image once LocationMind wants to run the app themselves.
+12. Connect to real data in Snowflake once access is granted.
 
 ---
 
@@ -96,7 +98,8 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Added one city per remaining jurisdiction (New York, London, Paris, Tokyo) with mixed G1 to G5 places, from a separate random stream so the original rows are unchanged (checked by hash and a test). Six new scenarios (8 to 13) covering the US, UK, EU and Japan rules, the place check, and the first Full release. Area dropdown shows the country and offers the usual jurisdiction. 58 tests (29 engine, 29 API). Scenarios 1 to 7 output unchanged.
 * Step 4 done: Who sees what page (tier by requester grid after all rules, compare with another jurisdiction or with the audience matrix alone, differing cells outlined, cells open the request builder) and Policy page (location groups, audience matrix, jurisdiction overrides with conditions in plain words, purpose rules, techniques and plans, place catalog, factor glossary, search and factor chip filters). New `/api/catalog`. 59 tests (29 engine, 30 API). Checked in Chrome.
 * Changed (Pratham's call): removed the Thailand "k to be set with counsel" flag everywhere (policy.yaml, engine, API, UI, CLAUDE.md, spreadsheet Regional overrides cell). Thailand k is now a plain adjustable number (5) like every other jurisdiction, and the builder's k box shows the jurisdiction's policy value. Effect: Thailand no longer forces every request to Aggregate with review; Lv 1 to 3 Thailand stats can be Full again, and only TH_ADID_DEVICE_LEVEL stays a grey area. Scenario 4 unchanged except the counsel note. 60 tests.
-* Next: step 5, audit log page, techniques page, present mode, Playwright smoke test, README update.
+* Step 5 done, v0.2 complete: Audit log page (filters, Needs review tab, expand, JSONL export), Techniques page (before and after samples from new `/api/techniques/samples`), Present mode (13 scenarios, keyboard, full screen, expected outcome check), Playwright smoke test using installed Chrome (walks present mode, loads every page, runs a builder request; 3 pass), README rewritten for v0.2. 61 Python tests. Checked in Chrome.
+* Next: present v0.2 to Dr. Matsuo; then technique selection once his papers arrive.
 
 ### Oct 6, 2026
 * Added CLAUDE.md (full project context), STATUS.md, docs folder, .gitignore.
