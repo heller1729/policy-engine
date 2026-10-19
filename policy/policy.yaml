@@ -12,6 +12,16 @@ decisions: [Full, Masked, Aggregate, Blocked]
 # Tiers at or above this level are device level data.
 device_level_from_tier: 4
 
+# Riki's 7 level Privacy Impact framework, sheet 1.
+tier_names:
+  1: Wide area statistics
+  2: Regional statistics
+  3: Behavioral trends
+  4: Pseudonymous ID logs
+  5: Continuous trajectory
+  6: Sensitive attributes inferable
+  7: Direct identifier joined to location
+
 requesters: [public, commercial, internal, government, research]
 purposes: [tourism, cybersecurity, advertising]
 
