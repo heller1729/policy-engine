@@ -8,7 +8,7 @@ import { FactorChips } from "../components/FactorChip";
 import { MatrixGrid } from "../components/MatrixGrid";
 import { OutcomePill } from "../components/OutcomePill";
 import { FACTORS, splitFactors } from "../lib/factors";
-import { titleCase } from "../lib/labels";
+import { titleCase, usedInLabel } from "../lib/labels";
 import { rawMatrix } from "../lib/matrix";
 import { describeWhen } from "../lib/rules";
 
@@ -247,7 +247,7 @@ export function PolicyPage() {
                     </div>
                     <p className="mt-1 text-xs text-emerald-800/80">{t.description}</p>
                     <p className="mt-1 text-[11px] text-emerald-700/70">
-                      {t.used_in?.length ? `Used in ${t.used_in.join(", ")}` : "Registered, not used in any plan"}
+                      {usedInLabel(t.used_in)}
                     </p>
                   </li>
                 ))}

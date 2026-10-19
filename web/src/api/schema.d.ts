@@ -55,6 +55,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/techniques/samples": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Technique Samples
+         * @description Each registered technique applied to synthetic rows, before and after.
+         */
+        get: operations["technique_samples_api_techniques_samples_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/scenarios": {
         parameters: {
             query?: never;
@@ -579,6 +599,27 @@ export interface components {
             /** Used In */
             used_in?: string[];
         };
+        /** TechniqueSampleOut */
+        TechniqueSampleOut: {
+            /** Name */
+            name: string;
+            /** Factor */
+            factor: string | null;
+            /** Description */
+            description: string;
+            /** Rows In */
+            rows_in: number;
+            /** Rows Out */
+            rows_out: number;
+            /** Before */
+            before: {
+                [key: string]: unknown;
+            }[];
+            /** After */
+            after: {
+                [key: string]: unknown;
+            }[];
+        };
         /** TechniquesConfigOut */
         TechniquesConfigOut: {
             /** Plans */
@@ -696,6 +737,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TechniqueOut"][];
+                };
+            };
+        };
+    };
+    technique_samples_api_techniques_samples_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechniqueSampleOut"][];
                 };
             };
         };

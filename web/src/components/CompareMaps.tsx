@@ -12,6 +12,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { useEffect, useRef } from "react";
 import type { CellCount, MapCells } from "../api/client";
+import { plural } from "../lib/labels";
 
 setWorkerUrl(workerUrl);
 
@@ -158,7 +159,7 @@ export default function CompareMaps({ cells, outcome }: Props) {
       <figure>
         <figcaption className="mb-1.5 flex items-center justify-between text-xs">
           <span className="font-semibold text-slate-700">Input</span>
-          <span className="text-slate-500">{cells.input.length} cells, rows per cell (H3 res 9)</span>
+          <span className="text-slate-500">{plural(cells.input.length, "cell")}, rows per cell (H3 res 9)</span>
         </figcaption>
         <div ref={leftRef} className="h-80 overflow-hidden rounded-lg border border-slate-200" />
       </figure>
@@ -166,7 +167,7 @@ export default function CompareMaps({ cells, outcome }: Props) {
         <figcaption className="mb-1.5 flex items-center justify-between text-xs">
           <span className="font-semibold text-slate-700">Released</span>
           <span className="text-slate-500">
-            {cells.released.length} cells
+            {plural(cells.released.length, "cell")}
             {cells.suppressed.length > 0 && <>, {cells.suppressed.length} suppressed (dashed)</>}
           </span>
         </figcaption>

@@ -122,6 +122,16 @@ class TechniqueOut(BaseModel):
     used_in: list[str] = Field(default_factory=list)
 
 
+class TechniqueSampleOut(BaseModel):
+    name: str
+    factor: Optional[str]
+    description: str
+    rows_in: int
+    rows_out: int
+    before: list[dict]
+    after: list[dict]
+
+
 class TierOut(BaseModel):
     level: int
     name: str

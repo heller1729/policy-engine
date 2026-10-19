@@ -13,7 +13,7 @@ This file is the standing context for the project. Read it fully at the start of
 | Goal | A geolocation privacy standard, aligned with NIST SP 800-226, that governs how a large global mobility dataset can be used without reidentifying people |
 | This repo | Python prototype of the rule based privacy policy engine that enforces the standard |
 | Data | Irys movement data (Android advertising IDs). Lives in Snowflake. No access yet, so the prototype uses synthetic data only |
-| Stage | Prototype v0.1 working and shown at the IAB meeting (Oct 8, 2026). v0.2 in progress: API plus web UI on mock data, plan in `docs/UI_Plan.md`. Technique selection (advisor feedback) comes after |
+| Stage | Prototype v0.1 shown at the IAB meeting (Oct 8, 2026). v0.2 done (Oct 19, 2026): API plus web UI on mock data, plan in `docs/UI_Plan.md`. Next: technique selection (advisor feedback), then Docker when LocationMind wants to run it |
 
 ---
 
@@ -244,10 +244,10 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `demo.py` | Runs the scenarios. `--noise` turns on Laplace noise, `--only N` runs one |
 | `ask.py` | Single request from the command line, `--json` for the audit record |
 | `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`, `export_openapi.py`). Serves `web/dist` when built, with client side routes falling back to index.html |
-| `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
+| `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react, MapLibre, h3-js). `web/e2e/smoke.spec.ts` is the Playwright smoke test (`npm run test:e2e`, uses installed Chrome via `channel: chrome`, starts its own server on port 8799). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
 | `serve.py` | Starts the API on http://localhost:8000 |
 | `tests/test_engine.py` | 29 engine tests |
-| `tests/test_api.py` | 30 API tests (one per scenario plus 17) |
+| `tests/test_api.py` | 31 API tests (one per scenario plus 18) |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
 Run (inside the `policyengenv` virtual environment, which is git ignored):
@@ -259,6 +259,7 @@ pip install -r requirements.txt
 python demo.py
 python -m pytest -q
 python serve.py              # API, docs at http://localhost:8000/docs
+cd web && npm run test:e2e && cd ..   # browser smoke test, walks all 13 scenarios in present mode
 cd web && npm install && npm run build && cd ..   # then python serve.py serves the app at /
 python ask.py --tier 6 --requester commercial --jurisdiction saudi_arabia --purpose advertising --group G1 --area Mecca
 ```
@@ -343,7 +344,7 @@ City dataset: `generate(city=True)` adds `CITY_PLACES` (about six extra public p
 
 API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
 
-Web app pages (steps 2 to 4 of `docs/UI_Plan.md`): `/` request builder, `/matrix` who sees what (query `j`, `p`, `g`, `vs`; `vs=raw` compares with the audience matrix alone; cells link into the builder with the jurisdiction's usual area), `/policy` read only policy browser (query `q` searches rule IDs, factors, citations and conditions; factor chips filter; sections hide when nothing matches; includes the place catalog from `/api/catalog` and a factor glossary). In the builder: Run request calls `/api/request` with limit 1000 and shows a row funnel, two synced MapLibre maps (input cells at H3 res 9, released cells, suppressed cells dashed), a released rows table paged in the browser, and the audit record. The map is lazy loaded; the MapLibre worker is bundled by Vite (`?worker&url` plus `setWorkerUrl`, `worker.format: es`). Basemap is Carto Positron with no key; if it fails the map falls back to a plain background. Request state lives in URL query params (`tier`, `requester`, `jurisdiction`, `purpose`, `group`, `area`, `k`, `noise`, `eps`) so other pages can link into it. Live preview calls `/api/decide` with a 150 ms debounce. Outcome colors: Full green, Masked sky blue, Aggregate amber, Blocked rose. Flow step colors follow the Whimsical board. TypeScript is pinned to 5.9 because TypeScript 7 drops the compiler API that `openapi-typescript` needs. Build the web app (`npm run build`) as the type check before committing web changes.
+Web app pages (all five steps of `docs/UI_Plan.md` are done): `/techniques` (place_check card plus each registered technique applied to sample Riyadh rows via `/api/techniques/samples`), `/audit` (records since server start, filters, Needs review tab, expand to JSON, JSONL export, no approve button), `/present?n=N` (13 scenarios, arrow keys or space, full screen button, runs each scenario once and writes it to the audit log, shows a warning if the outcome differs from the scenario's expected one), `/` request builder, `/matrix` who sees what (query `j`, `p`, `g`, `vs`; `vs=raw` compares with the audience matrix alone; cells link into the builder with the jurisdiction's usual area), `/policy` read only policy browser (query `q` searches rule IDs, factors, citations and conditions; factor chips filter; sections hide when nothing matches; includes the place catalog from `/api/catalog` and a factor glossary). In the builder: Run request calls `/api/request` with limit 1000 and shows a row funnel, two synced MapLibre maps (input cells at H3 res 9, released cells, suppressed cells dashed), a released rows table paged in the browser, and the audit record. The map is lazy loaded; the MapLibre worker is bundled by Vite (`?worker&url` plus `setWorkerUrl`, `worker.format: es`). Basemap is Carto Positron with no key; if it fails the map falls back to a plain background. Request state lives in URL query params (`tier`, `requester`, `jurisdiction`, `purpose`, `group`, `area`, `k`, `noise`, `eps`) so other pages can link into it. Live preview calls `/api/decide` with a 150 ms debounce. Outcome colors: Full green, Masked sky blue, Aggregate amber, Blocked rose. Flow step colors follow the Whimsical board. TypeScript is pinned to 5.9 because TypeScript 7 drops the compiler API that `openapi-typescript` needs. Build the web app (`npm run build`) as the type check before committing web changes.
 
 Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tighten and are recorded as `policy_overrides` in the audit record. `/api/decide` is for live preview and is not audited; `/api/request` is.
 

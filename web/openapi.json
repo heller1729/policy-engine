@@ -73,6 +73,32 @@
         }
       }
     },
+    "/api/techniques/samples": {
+      "get": {
+        "tags": [
+          "Policy"
+        ],
+        "summary": "Technique Samples",
+        "description": "Each registered technique applied to synthetic rows, before and after.",
+        "operationId": "technique_samples_api_techniques_samples_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TechniqueSampleOut"
+                  },
+                  "type": "array",
+                  "title": "Response Technique Samples Api Techniques Samples Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scenarios": {
       "get": {
         "tags": [
@@ -1522,6 +1548,64 @@
           "description"
         ],
         "title": "TechniqueOut"
+      },
+      "TechniqueSampleOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "rows_in": {
+            "type": "integer",
+            "title": "Rows In"
+          },
+          "rows_out": {
+            "type": "integer",
+            "title": "Rows Out"
+          },
+          "before": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Before"
+          },
+          "after": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "factor",
+          "description",
+          "rows_in",
+          "rows_out",
+          "before",
+          "after"
+        ],
+        "title": "TechniqueSampleOut"
       },
       "TechniquesConfigOut": {
         "properties": {

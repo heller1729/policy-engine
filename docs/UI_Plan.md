@@ -1,6 +1,6 @@
 # Policy Engine v0.2: Presentable Version Plan
 
-Status: in progress, Oct 19, 2026. Steps 1 (API layer), 2 (web skeleton and request builder), 3 (run path with funnel, map, table, audit) and 4 (who sees what with compare, policy browser) done. Data stays synthetic.
+Status: done, Oct 19, 2026. All five steps are built: API layer, request builder, run path with funnel and maps, who sees what and policy pages, and audit, techniques and present pages with a Playwright smoke test. Data stays synthetic.
 
 ## Goal
 
@@ -133,7 +133,7 @@ The basemap needs internet. If the venue network fails, the map falls back to dr
 2. Web skeleton with routing and the typed client. Request builder with live decision and pipeline view.
 3. Run path: row funnel, map, table, audit tab.
 4. Who sees what grid and compare mode. Policy page.
-5. Audit page, techniques page, present mode, single command serving, README update.
+5. Audit page, techniques page, present mode, single command serving, README update. Smoke test uses the installed Chrome instead of downloading a browser.
 
 Each step ends with tests passing and a commit.
 
