@@ -161,3 +161,10 @@ def test_city_dataset_is_opt_in_and_fuller():
     r = city_client.post("/api/request", json=body()).json()
     assert r["decision"]["outcome"] == "Aggregate"
     assert len(r["map"]["input"]) > 20
+
+
+def test_catalog_endpoint(client):
+    c = client.get("/api/catalog").json()
+    assert c["strictness"][0] == "G1" and c["outside_group"] == "G5"
+    assert {p["area"] for p in c["places"]} >= {"Mecca", "New York", "London", "Paris", "Tokyo"}
+    assert all(p["group"] in {"G1", "G2", "G3", "G4"} for p in c["places"])

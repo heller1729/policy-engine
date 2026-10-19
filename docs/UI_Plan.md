@@ -1,6 +1,6 @@
 # Policy Engine v0.2: Presentable Version Plan
 
-Status: in progress, Oct 19, 2026. Steps 1 (API layer), 2 (web skeleton and request builder) and 3 (run path with funnel, map, table, audit) done. Data stays synthetic.
+Status: in progress, Oct 19, 2026. Steps 1 (API layer), 2 (web skeleton and request builder), 3 (run path with funnel, map, table, audit) and 4 (who sees what with compare, policy browser) done. Data stays synthetic.
 
 ## Goal
 

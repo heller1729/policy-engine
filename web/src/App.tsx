@@ -1,8 +1,14 @@
 import { ExternalLink } from "lucide-react";
 import { NavLink, Route, Routes } from "react-router-dom";
+import { PolicyPage } from "./pages/PolicyPage";
 import { RequestBuilder } from "./pages/RequestBuilder";
+import { WhoSeesWhat } from "./pages/WhoSeesWhat";
 
-const NAV = [{ to: "/", label: "Request builder" }];
+const NAV = [
+  { to: "/", label: "Request builder" },
+  { to: "/matrix", label: "Who sees what" },
+  { to: "/policy", label: "Policy" },
+];
 
 export function App() {
   return (
@@ -40,6 +46,8 @@ export function App() {
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6">
         <Routes>
+          <Route path="/matrix" element={<WhoSeesWhat />} />
+          <Route path="/policy" element={<PolicyPage />} />
           <Route path="*" element={<RequestBuilder />} />
         </Routes>
       </main>

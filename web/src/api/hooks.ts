@@ -45,3 +45,16 @@ export function useRun() {
       unwrap(api.POST("/api/request", { body, params: { query: { limit: RUN_ROW_LIMIT } } })),
   });
 }
+
+export function useMatrix(jurisdiction: string, purpose: string, location_group: string, enabled = true) {
+  return useQuery({
+    queryKey: ["matrix", jurisdiction, purpose, location_group],
+    queryFn: () => unwrap(api.POST("/api/matrix", { body: { jurisdiction, purpose, location_group } })),
+    enabled: enabled && !!jurisdiction,
+    staleTime: Infinity,
+  });
+}
+
+export function useCatalog() {
+  return useQuery({ queryKey: ["catalog"], queryFn: () => unwrap(api.GET("/api/catalog")), staleTime: Infinity });
+}
