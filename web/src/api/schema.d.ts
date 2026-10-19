@@ -194,6 +194,10 @@ export interface components {
         AreaSummaryOut: {
             /** Area */
             area: string;
+            /** Country */
+            country: string;
+            /** Jurisdiction */
+            jurisdiction: string;
             /** Rows */
             rows: number;
             /** Devices */

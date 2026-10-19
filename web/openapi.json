@@ -417,6 +417,14 @@
             "type": "string",
             "title": "Area"
           },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
           "rows": {
             "type": "integer",
             "title": "Rows"
@@ -450,6 +458,8 @@
         "type": "object",
         "required": [
           "area",
+          "country",
+          "jurisdiction",
           "rows",
           "devices",
           "center",

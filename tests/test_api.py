@@ -33,9 +33,9 @@ def test_scenarios_through_api(client, sc):
     assert d["review"] == sc.expected_review
 
 
-def test_scenarios_endpoint_lists_all_seven(client):
+def test_scenarios_endpoint_lists_all(client):
     data = client.get("/api/scenarios").json()
-    assert [s["number"] for s in data] == list(range(1, 8))
+    assert [s["number"] for s in data] == list(range(1, 14))
 
 
 def test_decide_does_not_touch_audit(client):

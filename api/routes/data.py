@@ -2,6 +2,7 @@ from collections import Counter, defaultdict
 
 from fastapi import APIRouter, Depends
 
+from synthetic import AREA_INFO
 from ..schemas import DataSummaryOut
 from ..state import EngineState, get_state
 
@@ -33,6 +34,8 @@ def summary(state: EngineState = Depends(get_state)):
         "areas": [
             {
                 "area": name,
+                "country": AREA_INFO.get(name, ("", ""))[0],
+                "jurisdiction": AREA_INFO.get(name, ("", ""))[1],
                 "rows": a["rows"],
                 "devices": len(a["devices"]),
                 "center": [round(a["lat"] / a["rows"], 4), round(a["lng"] / a["rows"], 4)],

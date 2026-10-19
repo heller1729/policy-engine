@@ -7,7 +7,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from engine import DecisionPoint, EnforcementPoint, PlaceCatalog, Policy, PolicyError, Request  # noqa: E402
-from synthetic import generate  # noqa: E402
+from synthetic import AREA_INFO, AREA_WEIGHTS, generate  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -207,3 +207,13 @@ def test_no_released_row_is_looser_than_its_own_group(policy):
                         g = catalog.group_for(r)
                         own = pdp.decide(Request(tier, requester, jur, purpose, g)).outcome
                         assert policy.rank(own) <= policy.rank(run.decision.outcome), (req, g)
+
+
+def test_world_cities_do_not_change_original_rows():
+    with_world = [r for r in generate(n_devices=400, seed=9) if r["area"] in AREA_WEIGHTS]
+    assert with_world == generate(n_devices=400, seed=9, world=False)
+
+
+def test_every_jurisdiction_has_a_city(policy):
+    covered = {AREA_INFO[a][1] for a in {r["area"] for r in generate(n_devices=400, seed=9)}}
+    assert set(policy.jurisdictions) <= covered

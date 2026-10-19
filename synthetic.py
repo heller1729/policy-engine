@@ -57,15 +57,64 @@ CITY_PLACES = [
     ("Bangkok", "Wat Arun", "G1", 13.7440, 100.4890),
 ]
 
+# One major city for each jurisdiction that had no data: US, UK, EU and Japan.
+# Generated from a separate random stream after the original cities, so the
+# original rows do not change. Hospitals, clinics, schools and offices have
+# generic names; coordinates are approximate.
+WORLD_PLACES = [
+    ("New York", "Times Square", "G5", 40.7580, -73.9855),
+    ("New York", "Grand Central Terminal", "G5", 40.7527, -73.9772),
+    ("New York", "Central Park", "G5", 40.7829, -73.9654),
+    ("New York", "Midtown hospital", "G1", 40.7644, -73.9550),
+    ("New York", "Reproductive health clinic", "G2", 40.7390, -73.9900),
+    ("New York", "Federal office building", "G4", 40.7155, -74.0039),
+    ("London", "Oxford Street", "G5", 51.5152, -0.1419),
+    ("London", "King's Cross station", "G5", 51.5308, -0.1238),
+    ("London", "Hyde Park", "G5", 51.5073, -0.1657),
+    ("London", "Riverside hospital", "G1", 51.4986, -0.1186),
+    ("London", "Trade union office", "G2", 51.5246, -0.1340),
+    ("London", "Primary school", "G3", 51.5400, -0.1430),
+    ("Paris", "Louvre", "G5", 48.8606, 2.3376),
+    ("Paris", "Gare du Nord", "G5", 48.8809, 2.3553),
+    ("Paris", "Champs Elysees", "G5", 48.8698, 2.3076),
+    ("Paris", "Notre Dame", "G1", 48.8530, 2.3499),
+    ("Paris", "Addiction treatment centre", "G2", 48.8400, 2.3700),
+    ("Paris", "Defence ministry", "G4", 48.8350, 2.2790),
+    ("Tokyo", "Shibuya crossing", "G5", 35.6595, 139.7005),
+    ("Tokyo", "Tokyo station", "G5", 35.6812, 139.7671),
+    ("Tokyo", "Shinjuku Gyoen", "G5", 35.6852, 139.7100),
+    ("Tokyo", "Meiji Shrine", "G1", 35.6764, 139.6993),
+    ("Tokyo", "Elementary school", "G3", 35.6620, 139.7300),
+    ("Tokyo", "Political party office", "G2", 35.6760, 139.7440),
+]
+
 HOME_COUNTRIES = {
     "Mecca": {"SAU": 30, "IDN": 20, "PAK": 15, "IND": 10, "EGY": 8, "TUR": 6, "NGA": 5, "GBR": 3, "ISL": 0.3, "FJI": 0.3},
     "Riyadh": {"SAU": 60, "IND": 12, "PAK": 8, "EGY": 8, "USA": 4, "GBR": 3, "JPN": 1, "NOR": 0.3},
     "Dubai": {"ARE": 20, "IND": 30, "PAK": 10, "GBR": 10, "RUS": 8, "USA": 6, "JPN": 2, "CHL": 0.3},
     "Doha": {"QAT": 30, "IND": 25, "NPL": 15, "PHL": 10, "GBR": 5, "EST": 0.3},
     "Bangkok": {"THA": 50, "CHN": 15, "JPN": 8, "USA": 6, "GBR": 5, "DEU": 4, "URY": 0.3},
+    "New York": {"USA": 60, "CHN": 6, "IND": 5, "GBR": 5, "MEX": 5, "BRA": 3, "JPN": 3, "ISL": 0.3},
+    "London": {"GBR": 55, "IND": 8, "USA": 7, "FRA": 6, "POL": 5, "CHN": 4, "NGA": 3, "FJI": 0.3},
+    "Paris": {"FRA": 55, "USA": 8, "GBR": 7, "DEU": 6, "CHN": 5, "ITA": 5, "JPN": 3, "URY": 0.3},
+    "Tokyo": {"JPN": 65, "CHN": 10, "KOR": 8, "USA": 5, "TWN": 4, "THA": 3, "AUS": 2, "EST": 0.3},
 }
 
 AREA_WEIGHTS = {"Mecca": 3, "Riyadh": 3, "Dubai": 2, "Doha": 1, "Bangkok": 2}
+WORLD_WEIGHTS = {"New York": 1, "London": 1, "Paris": 1, "Tokyo": 1}
+
+# Country of each area and the policy jurisdiction that usually applies there.
+AREA_INFO = {
+    "Mecca": ("SAU", "saudi_arabia"),
+    "Riyadh": ("SAU", "saudi_arabia"),
+    "Dubai": ("ARE", "uae"),
+    "Doha": ("QAT", "qatar"),
+    "Bangkok": ("THA", "thailand"),
+    "New York": ("USA", "us"),
+    "London": ("GBR", "uk"),
+    "Paris": ("FRA", "eu"),
+    "Tokyo": ("JPN", "japan"),
+}
 
 
 def _jitter(rng, lat, lng, meters=150):
@@ -73,16 +122,27 @@ def _jitter(rng, lat, lng, meters=150):
     return lat + rng.uniform(-d, d), lng + rng.uniform(-d, d)
 
 
-def generate(n_devices=3000, start=date(2025, 12, 1), days=7, seed=42, city=False):
-    """city=True adds CITY_PLACES and spreads visits wider, for a fuller map. The default output is unchanged."""
-    rng = random.Random(seed)
-    all_places = PLACES + CITY_PLACES if city else PLACES
+def generate(n_devices=3000, start=date(2025, 12, 1), days=7, seed=42, city=False, world=True):
+    """city=True adds CITY_PLACES and spreads visits wider, for a fuller map.
+
+    world=True appends New York, London, Paris and Tokyo from a separate random
+    stream, so the rows for the original five cities are the same either way.
+    """
     spread = 400 if city else 150
-    areas = list(AREA_WEIGHTS)
+    rows = _visits(random.Random(seed), n_devices, AREA_WEIGHTS, PLACES + CITY_PLACES if city else PLACES,
+                   spread, start, days)
+    if world:
+        rows += _visits(random.Random(seed + 1000), round(n_devices * 0.8), WORLD_WEIGHTS, WORLD_PLACES,
+                        spread, start, days)
+    return rows
+
+
+def _visits(rng, n_devices, weights, all_places, spread, start, days):
+    areas = list(weights)
     rows = []
     for _ in range(n_devices):
         device_id = str(uuid.UUID(int=rng.getrandbits(128), version=4))
-        area = rng.choices(areas, weights=[AREA_WEIGHTS[a] for a in areas])[0]
+        area = rng.choices(areas, weights=[weights[a] for a in areas])[0]
         countries = HOME_COUNTRIES[area]
         home = rng.choices(list(countries), weights=list(countries.values()))[0]
         places = [p for p in all_places if p[0] == area]
