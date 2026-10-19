@@ -247,9 +247,11 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `tests/test_api.py` | 22 API tests |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
-Run:
+Run (inside the `policyengenv` virtual environment, which is git ignored):
 
 ```
+python -m venv policyengenv
+policyengenv\Scripts\Activate.ps1      # PowerShell; Git Bash: source policyengenv/Scripts/activate
 pip install -r requirements.txt
 python demo.py
 python -m pytest -q
