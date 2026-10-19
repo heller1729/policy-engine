@@ -1,5 +1,6 @@
 """FastAPI app around the policy engine. Serves the built web app from web/dist when it exists."""
 
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -24,10 +25,10 @@ class SinglePageApp(StaticFiles):
             return await super().get_response("index.html", scope)
 
 
-def create_app(policy_path=None, audit_path=None) -> FastAPI:
+def create_app(policy_path=None, audit_path=None, city=False) -> FastAPI:
     app = FastAPI(title="Geolocation Privacy Policy Engine", version="0.2",
                   description="Synthetic data only. Decisions follow policy/policy.yaml.")
-    app.state.engine = EngineState(policy_path=policy_path, audit_path=audit_path)
+    app.state.engine = EngineState(policy_path=policy_path, audit_path=audit_path, city=city)
     for module in (policy, scenarios, decide, matrix, audit, data):
         app.include_router(module.router, prefix="/api")
     if WEB_DIST.is_dir():
@@ -35,4 +36,4 @@ def create_app(policy_path=None, audit_path=None) -> FastAPI:
     return app
 
 
-app = create_app(audit_path="out/api_audit.jsonl")
+app = create_app(audit_path="out/api_audit.jsonl", city=os.environ.get("POLICY_ENGINE_DATA") == "city")

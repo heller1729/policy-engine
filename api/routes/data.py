@@ -26,6 +26,7 @@ def summary(state: EngineState = Depends(get_state)):
 
     return {
         "synthetic": True,
+        "dataset": "city" if state.city else "default",
         "rows": len(rows),
         "devices": len({r["device_id"] for r in rows}),
         "dates": sorted({r["date"] for r in rows}),

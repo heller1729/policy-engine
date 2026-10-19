@@ -1,6 +1,6 @@
 # Policy Engine v0.2: Presentable Version Plan
 
-Status: in progress, Oct 19, 2026. Steps 1 (API layer) and 2 (web skeleton and request builder) done. Data stays synthetic.
+Status: in progress, Oct 19, 2026. Steps 1 (API layer), 2 (web skeleton and request builder) and 3 (run path with funnel, map, table, audit) done. Data stays synthetic.
 
 ## Goal
 
@@ -21,7 +21,7 @@ What a viewer should be able to do in the app:
 | Engine | Existing `engine/` package, unchanged in behavior | Keeps the 22 tests and the invariants as they are |
 | API | FastAPI, Pydantic models, uvicorn | Python, same process as the engine, typed request and response models, free OpenAPI page |
 | Web | React, TypeScript 5.9, Vite, Tailwind, TanStack Query, openapi-fetch, lucide-react | Small hand written components on Tailwind instead of shadcn/ui, which kept the setup simple. TypeScript stays on 5.9 because 7 breaks `openapi-typescript` |
-| Map | MapLibre GL with deck.gl `H3HexagonLayer`, `h3-js` | Draws the released H3 cells directly. No map API key needed (Carto or OpenFreeMap basemap) |
+| Map | MapLibre GL and `h3-js`, no deck.gl | Cells are drawn as GeoJSON polygons from `cellToBoundary`, which is lighter than deck.gl. Carto Positron basemap, no key, plain background fallback |
 | Charts | Recharts | Only needed for the row funnel and small summaries |
 | Serving | FastAPI serves the built web app | One command to run the whole thing for a presentation |
 
@@ -107,7 +107,7 @@ A walkthrough of the seven scenarios, one per screen, with large type and keyboa
 
 ## Mock data
 
-`synthetic.py` stays as it is with seed 42 so the demo numbers and tests do not move. The API generates the dataset once at startup. A later option is a larger dataset with more places per area for a fuller map, behind a flag, without changing the default.
+`synthetic.py` stays as it is with seed 42 so the demo numbers and tests do not move. The API generates the dataset once at startup. The fuller dataset now exists behind `python serve.py --city` (more places per area, wider spread, 8000 devices). The default dataset is unchanged.
 
 ## Running it
 

@@ -8,7 +8,7 @@ Read `CLAUDE.md` first for standing context. This file is the running log. At th
 
 ## Where things stand
 
-Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API plus web UI, mock data) is in progress; the API layer is done. Seven demo scenarios, 44 passing tests, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
+Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API plus web UI, mock data) is in progress; the API and the request builder with run results and map are done. Seven demo scenarios, 45 passing tests, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
 
 ---
 
@@ -52,6 +52,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Whether contractual constraints (F) stay their own set.
 * Thailand k value, to be set with counsel.
 * Exact place lists per location group and per country shifts.
+* Should Masked output also drop rows at G3 and G4 places (add them to `sensitive_groups`), or should the engine look up the group per row? Today a G5 request over an area can release device rows at a school or children's hospital.
 
 ---
 
@@ -89,7 +90,9 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Decided: React over Streamlit. No approve button for grey areas. IAB (Oct 8) went well; no deadline for v0.2, present as work in progress. Docker image later.
 * Also: added the `policyengenv` virtual environment to setup docs; Pratham ran the tests (44 pass) and the server locally; API docs grouped by tag.
 * Step 2 done: `web/` React app (Vite, TypeScript 5.9, Tailwind). Request builder with demo scenario picker, the five attributes plus area, a what if panel (k, noise, epsilon), live decision banner, flow steps in board colors, a strictness ladder (Full to Blocked) showing where each rule capped, rule cards grouped by step with factor chips and citations, and the technique plan. Typed API responses for policy, audit and data summary; OpenAPI types generated into the web app. FastAPI serves the built app with client side route fallback. Checked in Chrome: Mecca case, Thailand grey area, unknown jurisdiction with a rejected override.
-* Next: step 3, run path in the request builder (Run button, row funnel, map of input vs released cells, released rows table, audit record tab).
+* Step 3 done: Run request button, row funnel, two synced maps (input vs released, suppressed cells dashed), released rows table, audit record with copy. City dataset behind `python serve.py --city` for a fuller map; default data unchanged. 45 tests (22 engine, 23 API). Checked in Chrome: Mecca counts (city data 6,492 rows to 585 cells to 296), Dubai Masked (hashed IDs, no hour), Mecca advertiser Blocked.
+* Found: Masked output for the Dubai advertiser request includes device rows at a G3 place (Children's hospital, city dataset). `drop_sensitive_rows` only drops G1 and G2. Needs a policy call, logged under open decisions and known gaps.
+* Next: step 4, Who sees what page (matrix and compare mode) and the Policy page.
 
 ### Oct 6, 2026
 * Added CLAUDE.md (full project context), STATUS.md, docs folder, .gitignore.
