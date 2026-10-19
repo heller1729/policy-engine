@@ -13,7 +13,7 @@ This file is the standing context for the project. Read it fully at the start of
 | Goal | A geolocation privacy standard, aligned with NIST SP 800-226, that governs how a large global mobility dataset can be used without reidentifying people |
 | This repo | Python prototype of the rule based privacy policy engine that enforces the standard |
 | Data | Irys movement data (Android advertising IDs). Lives in Snowflake. No access yet, so the prototype uses synthetic data only |
-| Stage | Prototype v0.1 working. Next version must support selecting between many privacy and encryption techniques (advisor feedback) |
+| Stage | Prototype v0.1 working and shown at the IAB meeting (Oct 8, 2026). v0.2 in progress: API plus web UI on mock data, plan in `docs/UI_Plan.md`. Technique selection (advisor feedback) comes after |
 
 ---
 
@@ -238,9 +238,13 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `engine/techniques.py` | Technique classes plus `REGISTRY` and `@register` |
 | `engine/audit.py` | Writes one JSON line per request to `out/audit.jsonl` |
 | `synthetic.py` | Synthetic visit data |
-| `demo.py` | Seven scenarios. `--noise` turns on Laplace noise, `--only N` runs one |
+| `scenarios.py` | The seven demo scenarios with expected outcomes, shared by demo, API and tests |
+| `demo.py` | Runs the scenarios. `--noise` turns on Laplace noise, `--only N` runs one |
 | `ask.py` | Single request from the command line, `--json` for the audit record |
-| `tests/test_engine.py` | 22 pytest tests |
+| `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`). Serves `web/dist` when built |
+| `serve.py` | Starts the API on http://localhost:8000 |
+| `tests/test_engine.py` | 22 engine tests |
+| `tests/test_api.py` | 22 API tests |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
 Run:
@@ -249,10 +253,11 @@ Run:
 pip install -r requirements.txt
 python demo.py
 python -m pytest -q
+python serve.py              # API, docs at http://localhost:8000/docs
 python ask.py --tier 6 --requester commercial --jurisdiction saudi_arabia --purpose advertising --group G1 --area Mecca
 ```
 
-Stack: Python 3.11, PyYAML, h3 (v4 API: `latlng_to_cell`, `cell_to_parent`, `get_resolution`), pytest. Rows are plain lists of dicts, no pandas.
+Stack: Python 3.11+, FastAPI, PyYAML, h3 (v4 API: `latlng_to_cell`, `cell_to_parent`, `get_resolution`), pytest. Rows are plain lists of dicts, no pandas.
 
 ### Decision logic (pdp.py)
 
@@ -318,6 +323,10 @@ Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `are
 ### Tests
 
 22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Run tests before every commit. Keep the exhaustive test.
+
+API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
+
+Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tighten and are recorded as `policy_overrides` in the audit record. `/api/decide` is for live preview and is not audited; `/api/request` is.
 
 ---
 

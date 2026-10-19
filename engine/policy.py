@@ -1,4 +1,6 @@
+import copy
 from pathlib import Path
+
 import yaml
 
 DEFAULT_POLICY = Path(__file__).resolve().parent.parent / "policy" / "policy.yaml"
@@ -22,6 +24,7 @@ class Policy:
         self.jurisdictions = data["jurisdictions"]
         self.purpose_rules = data.get("purpose_rules", [])
         self.techniques = data["techniques"]
+        self.overrides = {}
         self._validate()
 
     @classmethod
@@ -29,6 +32,39 @@ class Policy:
         path = Path(path or DEFAULT_POLICY)
         with open(path) as f:
             return cls(yaml.safe_load(f))
+
+    def with_overrides(self, noise=None, epsilon=None, k_min=None):
+        """A copy of the policy for a what if run. Overrides can add noise or raise k, never loosen a rule."""
+        data = copy.deepcopy(self.data)
+        applied = {}
+        if noise is not None or epsilon is not None:
+            module = data["techniques"].get("optional", {}).get("laplace_noise")
+            if module is None:
+                raise PolicyError("Policy has no laplace_noise module to override")
+            required = module.get("enabled", False)
+            if noise is not None:
+                if required and not noise:
+                    raise PolicyError("The policy enables laplace_noise, an override cannot switch it off")
+                module["enabled"] = bool(noise)
+                applied["noise"] = bool(noise)
+            if epsilon is not None:
+                if epsilon <= 0:
+                    raise PolicyError("epsilon must be greater than 0")
+                if required and epsilon > float(module.get("epsilon", 1.0)):
+                    raise PolicyError("The policy enables laplace_noise, an override can only lower epsilon")
+                module["epsilon"] = float(epsilon)
+                applied["epsilon"] = float(epsilon)
+        if k_min is not None:
+            current = data["thresholds"]["k_default"]
+            if k_min < current:
+                raise PolicyError(f"k can only be raised, k_min {k_min} is below the default {current}")
+            data["thresholds"]["k_default"] = k_min
+            for conf in data["jurisdictions"].values():
+                conf["k"] = max(conf.get("k", current), k_min)
+            applied["k_min"] = k_min
+        policy = Policy(data)
+        policy.overrides = applied
+        return policy
 
     def rank(self, decision: str) -> int:
         return self._rank[decision]

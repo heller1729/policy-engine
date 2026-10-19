@@ -8,25 +8,9 @@
 import argparse
 import copy
 
-from engine import AuditLog, EnforcementPoint, Policy, Request
+from engine import AuditLog, EnforcementPoint, Policy
+from scenarios import SCENARIOS
 from synthetic import generate
-
-SCENARIOS = [
-    ("Mecca case: advertiser asks for device level Mecca visits",
-     Request(6, "commercial", "saudi_arabia", "advertising", "G1", area="Mecca")),
-    ("Tourism ministry asks for Mecca visitor counts by home country",
-     Request(2, "government", "saudi_arabia", "tourism", "G1", area="Mecca")),
-    ("Advertiser asks for visit history at Dubai malls",
-     Request(5, "commercial", "uae", "advertising", "G5", area="Dubai")),
-    ("Same advertiser request, but in Thailand",
-     Request(5, "commercial", "thailand", "advertising", "G5", area="Bangkok")),
-    ("Internal team, cybersecurity, raw data near a defence site",
-     Request(7, "internal", "saudi_arabia", "cybersecurity", "G4", area="Riyadh")),
-    ("Research partner asks for movement trends in Doha",
-     Request(3, "research", "qatar", "tourism", "G5", area="Doha")),
-    ("Request from a country with no rules yet",
-     Request(2, "government", "brazil", "tourism", "G5", area="Riyadh")),
-]
 
 
 def show(title, rows, decision, record, max_rows=6):
@@ -70,11 +54,11 @@ def main():
         policy = Policy(data)
 
     pep = EnforcementPoint(policy, generate(), AuditLog(args.audit), seed=7)
-    for i, (title, req) in enumerate(SCENARIOS, 1):
-        if args.only and i != args.only:
+    for sc in SCENARIOS:
+        if args.only and sc.number != args.only:
             continue
-        rows, decision, record = pep.handle(req)
-        show(f"{i}. {title}", rows, decision, record)
+        rows, decision, record = pep.handle(sc.request())
+        show(f"{sc.number}. {sc.title}", rows, decision, record)
     print("=" * 78)
     print(f"Audit log written to {args.audit}")
 

@@ -1,9 +1,20 @@
 """Policy Enforcement Point: stops each request, asks the PDP, applies the plan."""
 
+from dataclasses import dataclass, field
+
 from . import techniques
 from .audit import AuditLog
 from .pdp import DecisionPoint
 from .policy import Policy
+
+
+@dataclass
+class Run:
+    rows: list
+    decision: object
+    record: dict
+    scoped: list = field(default_factory=list)
+    stages: list = field(default_factory=list)
 
 
 class EnforcementPoint:
@@ -16,9 +27,14 @@ class EnforcementPoint:
         self.seed = seed
 
     def handle(self, req):
+        run = self.run(req)
+        return run.rows, run.decision, run.record
+
+    def run(self, req, trace=False):
+        """Like handle, but with trace=True also keeps the scoped input and the rows after each step."""
         decision = self.pdp.decide(req)
         rows = self._scope(req)
-        steps = []
+        steps, stages = [], []
 
         if decision.outcome == "Blocked":
             result = []
@@ -35,9 +51,11 @@ class EnforcementPoint:
                 before = len(result)
                 result = t.apply(result, ctx)
                 steps.append({"technique": name, "factor": t.factor, "rows_in": before, "rows_out": len(result)})
+                if trace:
+                    stages.append(result)
 
-        record = self.audit.write(decision, steps)
-        return result, decision, record
+        record = self.audit.write(decision, steps, self.policy.overrides)
+        return Run(result, decision, record, rows if trace else [], stages)
 
     def _scope(self, req):
         if req.area is None:

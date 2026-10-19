@@ -1,6 +1,6 @@
 # Policy Engine v0.2: Presentable Version Plan
 
-Status: draft, Oct 19, 2026. Data stays synthetic.
+Status: in progress, Oct 19, 2026. Step 1 (API layer) done. Data stays synthetic.
 
 ## Goal
 
@@ -145,8 +145,11 @@ Each step ends with tests passing and a commit.
 * Choosing between techniques per jurisdiction, requester or purpose. That waits for the papers and its own design note. The techniques page and the plan section of the API are shaped so it can slot in.
 * Hosting for partners. Local run only unless that changes.
 
+## Decided
+
+* The IAB meeting was Oct 8, 2026, and v0.1 was well received. There is no fixed deadline for v0.2; it is presented as work in progress.
+* Build first. A Docker image comes later, once LocationMind wants to run it themselves.
+
 ## Open questions
 
-* Is the target the IAB meeting, and what is the date? That decides how much of steps 4 and 5 fit.
-* Will LocationMind run it themselves, or only see it in a meeting? If they run it, a Docker image or a small hosted instance is worth adding.
 * Should the matrix and pipeline views use the same colors as the Whimsical board, so the app and the diagram read as one thing?
