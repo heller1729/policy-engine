@@ -190,6 +190,22 @@ class PolicyOut(BaseModel):
     techniques: TechniquesConfigOut
 
 
+class CatalogPlaceOut(BaseModel):
+    name: str
+    area: str
+    group: str
+    lat: float
+    lng: float
+    buffer_m: int
+
+
+class CatalogOut(BaseModel):
+    buffer_m: int
+    outside_group: str
+    strictness: list[str]
+    places: list[CatalogPlaceOut]
+
+
 class AuditListOut(BaseModel):
     total: int
     records: list[dict]

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from engine import techniques
-from ..schemas import PolicyOut, TechniqueOut
+from ..schemas import CatalogOut, PolicyOut, TechniqueOut
 from ..state import EngineState, get_state
 
 router = APIRouter(tags=["Policy"])
@@ -37,6 +37,17 @@ def policy(state: EngineState = Depends(get_state)):
         "jurisdictions": [{"id": j, **conf} for j, conf in p.jurisdictions.items()],
         "purpose_rules": p.purpose_rules,
         "techniques": p.techniques,
+    }
+
+
+@router.get("/catalog", response_model=CatalogOut)
+def catalog(state: EngineState = Depends(get_state)):
+    c = state.catalog
+    return {
+        "buffer_m": c.buffer_m,
+        "outside_group": c.outside,
+        "strictness": c.strictness,
+        "places": [{**p, "buffer_m": p.get("buffer_m", c.buffer_m)} for p in c.places],
     }
 
 

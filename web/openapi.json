@@ -27,6 +27,27 @@
         }
       }
     },
+    "/api/catalog": {
+      "get": {
+        "tags": [
+          "Policy"
+        ],
+        "summary": "Catalog",
+        "operationId": "catalog_api_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/techniques": {
       "get": {
         "tags": [
@@ -551,6 +572,78 @@
           "records"
         ],
         "title": "AuditListOut"
+      },
+      "CatalogOut": {
+        "properties": {
+          "buffer_m": {
+            "type": "integer",
+            "title": "Buffer M"
+          },
+          "outside_group": {
+            "type": "string",
+            "title": "Outside Group"
+          },
+          "strictness": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Strictness"
+          },
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogPlaceOut"
+            },
+            "type": "array",
+            "title": "Places"
+          }
+        },
+        "type": "object",
+        "required": [
+          "buffer_m",
+          "outside_group",
+          "strictness",
+          "places"
+        ],
+        "title": "CatalogOut"
+      },
+      "CatalogPlaceOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "group": {
+            "type": "string",
+            "title": "Group"
+          },
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lng": {
+            "type": "number",
+            "title": "Lng"
+          },
+          "buffer_m": {
+            "type": "integer",
+            "title": "Buffer M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "area",
+          "group",
+          "lat",
+          "lng",
+          "buffer_m"
+        ],
+        "title": "CatalogPlaceOut"
       },
       "CellCount": {
         "properties": {

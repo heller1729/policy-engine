@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["catalog_api_catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/techniques": {
         parameters: {
             query?: never;
@@ -239,6 +256,32 @@ export interface components {
             records: {
                 [key: string]: unknown;
             }[];
+        };
+        /** CatalogOut */
+        CatalogOut: {
+            /** Buffer M */
+            buffer_m: number;
+            /** Outside Group */
+            outside_group: string;
+            /** Strictness */
+            strictness: string[];
+            /** Places */
+            places: components["schemas"]["CatalogPlaceOut"][];
+        };
+        /** CatalogPlaceOut */
+        CatalogPlaceOut: {
+            /** Name */
+            name: string;
+            /** Area */
+            area: string;
+            /** Group */
+            group: string;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+            /** Buffer M */
+            buffer_m: number;
         };
         /** CellCount */
         CellCount: {
@@ -618,6 +661,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+        };
+    };
+    catalog_api_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogOut"];
                 };
             };
         };

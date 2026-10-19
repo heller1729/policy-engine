@@ -15,6 +15,10 @@ export type RunResult = Schemas["RunOut"];
 export type CellCount = Schemas["CellCount"];
 export type MapCells = Schemas["MapOut"];
 export type Step = Schemas["StepOut"];
+export type MatrixResult = Schemas["MatrixOut"];
+export type MatrixCell = Schemas["MatrixCell"];
+export type Catalog = Schemas["CatalogOut"];
+export type Rule = Schemas["RuleOut"];
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
