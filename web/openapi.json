@@ -1363,6 +1363,20 @@
           "rows_out": {
             "type": "integer",
             "title": "Rows Out"
+          },
+          "withheld": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/WithheldGroup"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withheld"
           }
         },
         "type": "object",
@@ -1518,6 +1532,32 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WithheldGroup": {
+        "properties": {
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          },
+          "cap": {
+            "type": "string",
+            "title": "Cap"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows",
+          "cap",
+          "rules"
+        ],
+        "title": "WithheldGroup"
       }
     }
   }

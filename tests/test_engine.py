@@ -6,7 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from engine import DecisionPoint, EnforcementPoint, Policy, PolicyError, Request  # noqa: E402
+from engine import DecisionPoint, EnforcementPoint, PlaceCatalog, Policy, PolicyError, Request  # noqa: E402
 from synthetic import generate  # noqa: E402
 
 
@@ -160,3 +160,50 @@ def test_unregistered_technique_is_an_error(policy, data):
     pep = EnforcementPoint(Policy(raw), data)
     with pytest.raises(KeyError):
         pep.handle(Request(5, "commercial", "uae", "advertising", "G5", area="Dubai"))
+
+
+def test_drop_sensitive_rows_covers_g1_to_g4(policy):
+    from engine.techniques import build
+    rows = [{"place_group": g} for g in ("G1", "G2", "G3", "G4", "G5")]
+    out = build("drop_sensitive_rows", policy).apply(rows, {})
+    assert [r["place_group"] for r in out] == ["G5"]
+
+
+def test_catalog_matches_synthetic_labels():
+    catalog = PlaceCatalog.load()
+    for r in generate(n_devices=1500, seed=3):
+        assert catalog.group_for(r) == r["place_group"]
+
+
+def test_row_without_coordinates_fails_safe_to_g1():
+    assert PlaceCatalog.load().group_for({"device_id": "x"}) == "G1"
+
+
+def test_place_check_withholds_rows_by_their_own_group(policy, data):
+    pep = EnforcementPoint(policy, data)
+    rows, d, record = pep.handle(Request(5, "commercial", "uae", "advertising", "G5", area="Riyadh"))
+    check = record["enforcement"][0]
+    assert d.outcome == "Masked"
+    assert check["technique"] == "place_check"
+    assert set(check["withheld"]) == {"G1", "G3", "G4"}
+    assert "ADS_NO_VULNERABLE_TARGETING" in check["withheld"]["G3"]["rules"]
+    assert rows and all(r["place_group"] == "G5" for r in rows)
+
+
+def test_no_released_row_is_looser_than_its_own_group(policy):
+    small = generate(n_devices=300, seed=5)
+    catalog = PlaceCatalog.load()
+    pep = EnforcementPoint(policy, small, catalog=catalog)
+    pdp = DecisionPoint(policy)
+    for tier in (4, 5, 6, 7):
+        for requester in policy.requesters:
+            for jur in policy.jurisdictions:
+                for purpose in policy.purposes:
+                    req = Request(tier, requester, jur, purpose, "G5", area="Riyadh")
+                    run = pep.run(req, trace=True)
+                    if run.decision.outcome in ("Blocked", "Aggregate"):
+                        continue
+                    for r in run.stages[0]:
+                        g = catalog.group_for(r)
+                        own = pdp.decide(Request(tier, requester, jur, purpose, g)).outcome
+                        assert policy.rank(own) <= policy.rank(run.decision.outcome), (req, g)

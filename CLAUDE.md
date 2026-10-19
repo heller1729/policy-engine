@@ -231,6 +231,8 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | Path | What it is |
 | :-- | :-- |
 | `policy/policy.yaml` | All rules. Written by hand from the spreadsheet and proposal |
+| `policy/place_catalog.yaml` | Sensitive places (G1 to G4) with coordinates and a 600 m buffer. Synthetic stand in for LocationMind's real place list |
+| `engine/catalog.py` | `PlaceCatalog.group_for(row)`: a row's location group from its own coordinates (strictest buffer that contains it, else G5; no coordinates fails safe to G1) |
 | `engine/models.py` | `Request`, `RuleHit`, `Decision` dataclasses |
 | `engine/policy.py` | Loads and validates the policy. Rejects unknown decision names |
 | `engine/pdp.py` | `DecisionPoint.decide()`. Steps commented to match the board |
@@ -244,7 +246,7 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`, `export_openapi.py`). Serves `web/dist` when built, with client side routes falling back to index.html |
 | `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
 | `serve.py` | Starts the API on http://localhost:8000 |
-| `tests/test_engine.py` | 22 engine tests |
+| `tests/test_engine.py` | 27 engine tests |
 | `tests/test_api.py` | 23 API tests |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
@@ -276,6 +278,7 @@ Stack: Python 3.11+, FastAPI, PyYAML, h3 (v4 API: `latlng_to_cell`, `cell_to_par
 * k from the jurisdiction (default 5). `k_review: true` flags review.
 * Step 5 most restrictive cap wins. Every rule at that cap is a deciding rule.
 * Grey area: if any hit has `review: true`, Full or Masked becomes Aggregate and the request is flagged for human review.
+* Place check (PEP, before the plan, every non Blocked request): each row's group comes from the place catalog. For each group present, the PDP decides the same request with that group. Rows whose own group gets a stricter decision than the release (the outcome, or Aggregate for tiers 1 to 3) are withheld. The audit step `place_check` (factor B3) lists rows withheld per group with the cap and deciding rules. This makes most restrictive wins hold per row, not only per request.
 * Plan: Blocked runs nothing. Tiers 1 to 3 always run `aggregate_product_plan` (aggregate products are counts above k even when Full). Tier 4+ runs `techniques.plans[outcome]`. Enabled optional modules are appended when they apply to the effective decision.
 
 ### Rule format (policy.yaml)
@@ -298,7 +301,7 @@ Current jurisdiction rules: `TH_ADID_DEVICE_LEVEL` (Aggregate, review), `US_SENS
 | Name | Factor | Behavior |
 | :-- | :-- | :-- |
 | `hash_ids` | A2 | HMAC SHA256 of device_id with salt from env `POLICY_ENGINE_SALT` (fallback demo salt), output `h_` plus 16 hex chars |
-| `drop_sensitive_rows` | B2, B3 | Removes rows whose place_group is in `sensitive_groups` (G1, G2) |
+| `drop_sensitive_rows` | B2, B3 | Removes rows whose place_group label is in `sensitive_groups` (G1 to G4). Backup to the place check |
 | `coarsen_time` | E2 | Drops `hour` |
 | `aggregate_h3` | E1, E4 | Unique devices per (H3 cell at configured resolution, date, home_country) |
 | `suppress_small_cells` | E3 | Removes cells with unique_devices < k |
@@ -320,15 +323,15 @@ City dataset: `generate(city=True)` adds `CITY_PLACES` (about six extra public p
 | :-- | :-- | :-- | :-- |
 | 1 | Lv 6, commercial, saudi_arabia, advertising, G1, Mecca | Blocked | LOC_G1, audience matrix, ADS_NO_RED_LOCATION_TARGETING. SA_LOCALIZATION alone would be Aggregate |
 | 2 | Lv 2, government, saudi_arabia, tourism, G1, Mecca | Aggregate | G1 allows counts. About 2373 rows to 65 cells to 56 after k |
-| 3 | Lv 5, commercial, uae, advertising, G5, Dubai | Masked | Matrix. Drop step removes hospital rows (about 1702 to 854) |
-| 4 | Lv 5, commercial, thailand, advertising, G5, Bangkok | Aggregate, review | TH_ADID_DEVICE_LEVEL |
-| 5 | Lv 7, internal, saudi_arabia, cybersecurity, G4, Riyadh | Aggregate | G4 caps even internal |
+| 3 | Lv 5, commercial, uae, advertising, G5, Dubai | Masked | Matrix. Place check withholds 848 hospital rows (1702 to 854) |
+| 4 | Lv 5, commercial, thailand, advertising, G5, Bangkok | Aggregate, review | TH_ADID_DEVICE_LEVEL. Place check withholds 768 temple rows; 30 cells released |
+| 5 | Lv 7, internal, saudi_arabia, cybersecurity, G4, Riyadh | Aggregate | G4 caps even internal. Place check withholds 625 hospital rows (LOC_G1 blocks device level for everyone); 89 cells released |
 | 6 | Lv 3, research, qatar, tourism, G5, Doha | Aggregate | Matrix |
 | 7 | Lv 2, government, brazil, tourism, G5 | Blocked | Unknown jurisdiction, fail safe |
 
 ### Tests
 
-22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Run tests before every commit. Keep the exhaustive test.
+22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Plus 5 for the place catalog and masking: drop list covers G1 to G4, catalog agrees with the synthetic labels, missing coordinates fail safe to G1, place check withholds by each row's own group with the rules recorded, and an exhaustive per row check (tiers 4 to 7, every requester, jurisdiction and purpose over Riyadh) that no released row is looser than its own group's decision. `sample_demo_output.txt` is the reference demo output; regenerate it with `python demo.py > sample_demo_output.txt` when a result changes on purpose. Run tests before every commit. Keep the exhaustive tests.
 
 API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
 
@@ -345,6 +348,7 @@ Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tigh
 * Grey areas never release Full or Masked.
 * Every rule has an id, a factor, and a citation, and they reach the audit log.
 * Raw device IDs never leave in anything but Full for internal at device level.
+* Every released row is checked against its own location group from the place catalog, not only the group named in the request.
 * Techniques are chosen in policy, not hardcoded in the engine.
 * No real data in this repo, in tests, or in any chat. Synthetic only until Snowflake access is formally granted, and then real data stays where access lives.
 
@@ -354,11 +358,10 @@ Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tigh
 
 * policy.yaml is hand written; the spreadsheet cells are prose, so no generator yet.
 * Cross border transfer is folded into the Saudi rule; there is no destination attribute.
-* Location group is supplied by the request; there is no place catalog lookup.
+* The place catalog is synthetic and matches by distance to a point with a fixed buffer. Real use needs LocationMind's place list, polygons or H3 cells, per country shifts for the catalog, and legal review of the buffer size.
 * `laplace_noise` runs after suppression, so noisy counts can fall under k. Order and privacy budget need design against NIST SP 800-226. Unit of privacy (E6, user level) is not handled.
 * Data subject audience not modelled.
 * Technique choice is per decision only; not yet per jurisdiction, requester, or purpose.
-* Masked output can contain device rows at G3 and G4 places, because `drop_sensitive_rows` only removes G1 and G2 and the request names one location group for the whole area. Visible in the city dataset (Dubai advertiser request releases Children's hospital rows). Policy decision pending: add G3 and G4 to `sensitive_groups`, or look up the group per row.
 * `docs/Policy_Engine_Design.md` says the Saudi override "agrees" with Blocked in the Mecca case; in code SA_LOCALIZATION alone caps at Aggregate. Fix the doc wording.
 
 ---

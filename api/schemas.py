@@ -40,11 +40,18 @@ class DecisionOut(BaseModel):
     notes: list[str]
 
 
+class WithheldGroup(BaseModel):
+    rows: int
+    cap: str
+    rules: list[str]
+
+
 class StepOut(BaseModel):
     technique: str
     factor: Optional[str]
     rows_in: int
     rows_out: int
+    withheld: Optional[dict[str, WithheldGroup]] = None
 
 
 class CellCount(BaseModel):

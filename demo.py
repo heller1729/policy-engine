@@ -33,6 +33,8 @@ def show(title, rows, decision, record, max_rows=6):
         print("  Enforcement:")
         for s in record["enforcement"]:
             print(f"     {s['technique']:<22} [{s['factor']}]  rows {s['rows_in']} -> {s['rows_out']}")
+            for group, w in s.get("withheld", {}).items():
+                print(f"       withheld {w['rows']} rows at {group} places ({w['cap']}: {', '.join(w['rules'])})")
     print(f"  Released rows: {len(rows)}")
     for row in rows[:max_rows]:
         print("     ", {k: v for k, v in row.items() if k not in ("lat", "lng")})

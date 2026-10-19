@@ -211,4 +211,4 @@ techniques:
       epsilon: 1.0
   settings:
     hash_salt_env: POLICY_ENGINE_SALT
-    sensitive_groups: [G1, G2]
+    sensitive_groups: [G1, G2, G3, G4]

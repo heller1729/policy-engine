@@ -521,6 +521,10 @@ export interface components {
             rows_in: number;
             /** Rows Out */
             rows_out: number;
+            /** Withheld */
+            withheld?: {
+                [key: string]: components["schemas"]["WithheldGroup"];
+            } | null;
         };
         /** TechniqueOut */
         TechniqueOut: {
@@ -575,6 +579,15 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WithheldGroup */
+        WithheldGroup: {
+            /** Rows */
+            rows: number;
+            /** Cap */
+            cap: string;
+            /** Rules */
+            rules: string[];
         };
     };
     responses: never;

@@ -1,0 +1,31 @@
+# Place catalog: sensitive places (location groups G1 to G4) with a buffer.
+#
+# The enforcement point looks up each row's location group from its own
+# coordinates: a row inside a place's buffer takes that place's group, the
+# strictest one if buffers overlap, and G5 otherwise. Real data only carries
+# coordinates, so this replaces trusting the group named in the request.
+#
+# Synthetic stand in. Needs LocationMind's real place list and legal review
+# before it is used on real data. Coordinates are approximate.
+
+default_buffer_m: 600
+outside_group: G5
+# When buffers overlap, the group that comes first here wins.
+strictness: [G1, G2, G3, G4, G5]
+
+places:
+  - {name: "Masjid al-Haram", area: Mecca, group: G1, lat: 21.4225, lng: 39.8262}
+  - {name: "Specialist hospital", area: Riyadh, group: G1, lat: 24.6706, lng: 46.6773}
+  - {name: "International school", area: Riyadh, group: G3, lat: 24.74, lng: 46.65}
+  - {name: "Defence ministry", area: Riyadh, group: G4, lat: 24.66, lng: 46.71}
+  - {name: "General hospital", area: Dubai, group: G1, lat: 25.2371, lng: 55.3166}
+  - {name: "Wat Phra Kaew", area: Bangkok, group: G1, lat: 13.7516, lng: 100.4927}
+  - {name: "Mina", area: Mecca, group: G1, lat: 21.4133, lng: 39.8933}
+  - {name: "Ajyad hospital", area: Mecca, group: G1, lat: 21.4205, lng: 39.8275}
+  - {name: "Al Nuzha school", area: Mecca, group: G3, lat: 21.44, lng: 39.84}
+  - {name: "Al Rajhi mosque", area: Riyadh, group: G1, lat: 24.766, lng: 46.781}
+  - {name: "Jumeirah mosque", area: Dubai, group: G1, lat: 25.234, lng: 55.265}
+  - {name: "Children's hospital", area: Dubai, group: G3, lat: 25.226, lng: 55.317}
+  - {name: "Hamad hospital", area: Doha, group: G1, lat: 25.293, lng: 51.503}
+  - {name: "Siriraj hospital", area: Bangkok, group: G1, lat: 13.759, lng: 100.485}
+  - {name: "Wat Arun", area: Bangkok, group: G1, lat: 13.744, lng: 100.489}
