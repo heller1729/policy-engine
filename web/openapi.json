@@ -566,6 +566,10 @@
             "type": "boolean",
             "title": "Synthetic"
           },
+          "dataset": {
+            "type": "string",
+            "title": "Dataset"
+          },
           "rows": {
             "type": "integer",
             "title": "Rows"
@@ -592,6 +596,7 @@
         "type": "object",
         "required": [
           "synthetic",
+          "dataset",
           "rows",
           "devices",
           "dates",

@@ -11,6 +11,10 @@ export type RuleHit = Schemas["RuleHitOut"];
 export type PolicyInfo = Schemas["PolicyOut"];
 export type Scenario = Schemas["ScenarioOut"];
 export type DataSummary = Schemas["DataSummaryOut"];
+export type RunResult = Schemas["RunOut"];
+export type CellCount = Schemas["CellCount"];
+export type MapCells = Schemas["MapOut"];
+export type Step = Schemas["StepOut"];
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {

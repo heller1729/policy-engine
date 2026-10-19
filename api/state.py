@@ -7,9 +7,10 @@ from synthetic import generate
 
 
 class EngineState:
-    def __init__(self, policy_path=None, audit_path=None, n_devices=3000, seed=42):
+    def __init__(self, policy_path=None, audit_path=None, city=False, seed=42):
         self.policy = Policy.load(policy_path)
-        self.data = generate(n_devices=n_devices, seed=seed)
+        self.city = city
+        self.data = generate(n_devices=8000 if city else 3000, seed=seed, city=city)
         self.audit = AuditLog(audit_path)
         self.noise_seed = 7
 

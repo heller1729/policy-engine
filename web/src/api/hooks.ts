@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, unwrap, type RequestBody } from "./client";
 
@@ -35,4 +35,13 @@ export function useDecision(body: RequestBody) {
 
 export function useTechniques() {
   return useQuery({ queryKey: ["techniques"], queryFn: () => unwrap(api.GET("/api/techniques")), staleTime: Infinity });
+}
+
+export const RUN_ROW_LIMIT = 1000;
+
+export function useRun() {
+  return useMutation({
+    mutationFn: (body: RequestBody) =>
+      unwrap(api.POST("/api/request", { body, params: { query: { limit: RUN_ROW_LIMIT } } })),
+  });
 }

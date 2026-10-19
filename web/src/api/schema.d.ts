@@ -247,6 +247,8 @@ export interface components {
         DataSummaryOut: {
             /** Synthetic */
             synthetic: boolean;
+            /** Dataset */
+            dataset: string;
             /** Rows */
             rows: number;
             /** Devices */

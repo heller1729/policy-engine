@@ -14,6 +14,7 @@ python demo.py              # seven scenarios, including the Mecca case
 python demo.py --noise      # same, with the differential privacy module switched on
 python -m pytest -q         # tests
 python serve.py             # API on http://localhost:8000, interactive docs at /docs
+python serve.py --city      # fuller synthetic dataset for the map (numbers differ from the demo)
 ```
 
 One request from the command line:

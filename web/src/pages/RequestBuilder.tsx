@@ -1,12 +1,14 @@
+import { Loader2, Play } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { ApiError, type RequestBody } from "../api/client";
-import { useDataSummary, useDecision, usePolicy, useScenarios } from "../api/hooks";
+import { useDataSummary, useDecision, usePolicy, useRun, useScenarios } from "../api/hooks";
 import { Card } from "../components/Card";
 import { DecisionSummary } from "../components/DecisionSummary";
 import { FlowSteps } from "../components/FlowSteps";
 import { PlanView } from "../components/PlanView";
 import { RequestForm } from "../components/RequestForm";
 import { RuleSteps } from "../components/RuleSteps";
+import { RunResults } from "../components/RunResults";
 import { StrictnessLadder } from "../components/StrictnessLadder";
 import { readRequest, writeRequest } from "../lib/requestParams";
 
@@ -17,6 +19,11 @@ export function RequestBuilder() {
   const scenarios = useScenarios();
   const summary = useDataSummary();
   const decision = useDecision(request);
+  const run = useRun();
+
+  const key = writeRequest(request).toString();
+  const runKey = run.variables ? writeRequest(run.variables).toString() : null;
+  const stale = run.data !== undefined && runKey !== key;
 
   const update = (next: RequestBody) => setParams(writeRequest(next), { replace: true });
   const overrideError =
@@ -61,13 +68,46 @@ export function RequestBuilder() {
                 <RuleSteps decision={decision.data} />
               </div>
             </Card>
-            <Card title="What the enforcement point will run">
+            <Card
+              title="What the enforcement point will run"
+              aside={
+                <button
+                  type="button"
+                  disabled={run.isPending || !!overrideError}
+                  onClick={() => run.mutate(request)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
+                >
+                  {run.isPending ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
+                  Run request
+                </button>
+              }
+            >
               <PlanView
                 decision={decision.data}
                 tier={request.data_tier}
                 deviceLevelFrom={policy.data?.device_level_from_tier ?? 4}
               />
             </Card>
+            {run.isError && (
+              <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">Run failed: {run.error.message}</p>
+            )}
+            {run.data && (
+              <Card
+                title="Result"
+                aside={
+                  <span className="font-mono text-[11px] text-slate-400">request {run.data.decision.request_id}</span>
+                }
+              >
+                {stale && (
+                  <p className="mb-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    The request has changed since this run. Press Run request to update the result.
+                  </p>
+                )}
+                <div className={stale ? "opacity-50" : ""}>
+                  <RunResults key={run.data.decision.request_id} run={run.data} />
+                </div>
+              </Card>
+            )}
           </>
         ) : (
           !decision.error && <div className="h-40 animate-pulse rounded-xl bg-slate-100" />

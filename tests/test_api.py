@@ -149,3 +149,14 @@ def test_data_summary_has_no_device_ids(client):
     text = client.get("/api/data/summary").text
     assert '"synthetic":true' in text
     assert not any(r["device_id"] in text for r in client.app.state.engine.data)
+
+
+def test_city_dataset_is_opt_in_and_fuller():
+    default = TestClient(create_app()).get("/api/data/summary").json()
+    city_client = TestClient(create_app(city=True))
+    city = city_client.get("/api/data/summary").json()
+    assert default["dataset"] == "default" and city["dataset"] == "city"
+    assert city["rows"] > default["rows"]
+    r = city_client.post("/api/request", json=body()).json()
+    assert r["decision"]["outcome"] == "Aggregate"
+    assert len(r["map"]["input"]) > 20

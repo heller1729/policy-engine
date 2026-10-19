@@ -205,6 +205,7 @@ class AreaSummaryOut(BaseModel):
 
 class DataSummaryOut(BaseModel):
     synthetic: bool
+    dataset: str
     rows: int
     devices: int
     dates: list[str]

@@ -245,7 +245,7 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
 | `serve.py` | Starts the API on http://localhost:8000 |
 | `tests/test_engine.py` | 22 engine tests |
-| `tests/test_api.py` | 22 API tests |
+| `tests/test_api.py` | 23 API tests |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
 Run (inside the `policyengenv` virtual environment, which is git ignored):
@@ -312,6 +312,8 @@ To add a technique: subclass `Technique`, set `name`, `factor`, `description`, i
 
 Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `area` (Mecca, Riyadh, Dubai, Doha, Bangkok), `place`, `place_group` (G1 to G5), `lat`, `lng`, `h3_cell` (resolution 9), `date` (2025-12-01 to 07), `hour`. Defaults: 3000 devices, seed 42, 1 to 5 visits each. Each area has at least one G5 place and most have a G1 place; Riyadh also has G3 and G4. Rare nationalities (ISL, FJI, NOR, CHL, EST, URY) exist so suppression is visible.
 
+City dataset: `generate(city=True)` adds `CITY_PLACES` (about six extra public places per area, approximate coordinates, including G1 and G3 places in Dubai, Mecca and Bangkok), spreads visits 400 m instead of 150 m, and the API uses 8000 devices. Start it with `python serve.py --city` (sets `POLICY_ENGINE_DATA=city`). It exists for a fuller map; demo numbers differ, so the default dataset stays the reference for tests and the scenario table.
+
 ### Demo scenarios and expected results
 
 | # | Request | Result | Why |
@@ -330,7 +332,7 @@ Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `are
 
 API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
 
-Web app: only the request builder exists so far (step 2 of `docs/UI_Plan.md`). Request state lives in URL query params (`tier`, `requester`, `jurisdiction`, `purpose`, `group`, `area`, `k`, `noise`, `eps`) so other pages can link into it. Live preview calls `/api/decide` with a 150 ms debounce. Outcome colors: Full green, Masked sky blue, Aggregate amber, Blocked rose. Flow step colors follow the Whimsical board. TypeScript is pinned to 5.9 because TypeScript 7 drops the compiler API that `openapi-typescript` needs. Build the web app (`npm run build`) as the type check before committing web changes.
+Web app: only the request builder exists so far (steps 2 and 3 of `docs/UI_Plan.md`). Run request calls `/api/request` with limit 1000 and shows a row funnel, two synced MapLibre maps (input cells at H3 res 9, released cells, suppressed cells dashed), a released rows table paged in the browser, and the audit record. The map is lazy loaded; the MapLibre worker is bundled by Vite (`?worker&url` plus `setWorkerUrl`, `worker.format: es`). Basemap is Carto Positron with no key; if it fails the map falls back to a plain background. Request state lives in URL query params (`tier`, `requester`, `jurisdiction`, `purpose`, `group`, `area`, `k`, `noise`, `eps`) so other pages can link into it. Live preview calls `/api/decide` with a 150 ms debounce. Outcome colors: Full green, Masked sky blue, Aggregate amber, Blocked rose. Flow step colors follow the Whimsical board. TypeScript is pinned to 5.9 because TypeScript 7 drops the compiler API that `openapi-typescript` needs. Build the web app (`npm run build`) as the type check before committing web changes.
 
 Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tighten and are recorded as `policy_overrides` in the audit record. `/api/decide` is for live preview and is not audited; `/api/request` is.
 
@@ -356,6 +358,7 @@ Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tigh
 * `laplace_noise` runs after suppression, so noisy counts can fall under k. Order and privacy budget need design against NIST SP 800-226. Unit of privacy (E6, user level) is not handled.
 * Data subject audience not modelled.
 * Technique choice is per decision only; not yet per jurisdiction, requester, or purpose.
+* Masked output can contain device rows at G3 and G4 places, because `drop_sensitive_rows` only removes G1 and G2 and the request names one location group for the whole area. Visible in the city dataset (Dubai advertiser request releases Children's hospital rows). Policy decision pending: add G3 and G4 to `sensitive_groups`, or look up the group per row.
 * `docs/Policy_Engine_Design.md` says the Saudi override "agrees" with Blocked in the Mecca case; in code SA_LOCALIZATION alone caps at Aggregate. Fix the doc wording.
 
 ---

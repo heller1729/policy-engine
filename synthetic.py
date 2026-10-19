@@ -24,6 +24,39 @@ PLACES = [
     ("Bangkok", "Chatuchak market", "G5", 13.7999, 100.5500),
 ]
 
+# Extra public places for the city dataset (python serve.py --city). Coordinates are approximate.
+CITY_PLACES = [
+    ("Mecca", "Abraj Al Bait mall", "G5", 21.4189, 39.8257),
+    ("Mecca", "Aziziyah district", "G5", 21.4030, 39.8600),
+    ("Mecca", "Haramain railway station", "G5", 21.3930, 39.7940),
+    ("Mecca", "Mina", "G1", 21.4133, 39.8933),
+    ("Mecca", "Ajyad hospital", "G1", 21.4205, 39.8275),
+    ("Mecca", "Al Nuzha school", "G3", 21.4400, 39.8400),
+    ("Riyadh", "Riyadh Park mall", "G5", 24.7560, 46.6300),
+    ("Riyadh", "King Fahd stadium", "G5", 24.7890, 46.8390),
+    ("Riyadh", "Olaya metro station", "G5", 24.6950, 46.6850),
+    ("Riyadh", "Diriyah", "G5", 24.7340, 46.5750),
+    ("Riyadh", "Al Rajhi mosque", "G1", 24.7660, 46.7810),
+    ("Riyadh", "University campus", "G5", 24.7180, 46.6190),
+    ("Dubai", "Dubai Marina", "G5", 25.0800, 55.1400),
+    ("Dubai", "Mall of the Emirates", "G5", 25.1180, 55.2000),
+    ("Dubai", "Deira souk", "G5", 25.2690, 55.2970),
+    ("Dubai", "Jumeirah mosque", "G1", 25.2340, 55.2650),
+    ("Dubai", "Dubai airport", "G5", 25.2530, 55.3650),
+    ("Dubai", "Children's hospital", "G3", 25.2260, 55.3170),
+    ("Doha", "Souq Waqif", "G5", 25.2870, 51.5330),
+    ("Doha", "Katara", "G5", 25.3590, 51.5260),
+    ("Doha", "Hamad hospital", "G1", 25.2930, 51.5030),
+    ("Doha", "Education City", "G5", 25.3170, 51.4400),
+    ("Doha", "Corniche", "G5", 25.3000, 51.5200),
+    ("Bangkok", "Siam Paragon", "G5", 13.7460, 100.5350),
+    ("Bangkok", "Lumphini park", "G5", 13.7310, 100.5410),
+    ("Bangkok", "Khao San road", "G5", 13.7590, 100.4970),
+    ("Bangkok", "Siriraj hospital", "G1", 13.7590, 100.4850),
+    ("Bangkok", "Hua Lamphong station", "G5", 13.7390, 100.5170),
+    ("Bangkok", "Wat Arun", "G1", 13.7440, 100.4890),
+]
+
 HOME_COUNTRIES = {
     "Mecca": {"SAU": 30, "IDN": 20, "PAK": 15, "IND": 10, "EGY": 8, "TUR": 6, "NGA": 5, "GBR": 3, "ISL": 0.3, "FJI": 0.3},
     "Riyadh": {"SAU": 60, "IND": 12, "PAK": 8, "EGY": 8, "USA": 4, "GBR": 3, "JPN": 1, "NOR": 0.3},
@@ -40,8 +73,11 @@ def _jitter(rng, lat, lng, meters=150):
     return lat + rng.uniform(-d, d), lng + rng.uniform(-d, d)
 
 
-def generate(n_devices=3000, start=date(2025, 12, 1), days=7, seed=42):
+def generate(n_devices=3000, start=date(2025, 12, 1), days=7, seed=42, city=False):
+    """city=True adds CITY_PLACES and spreads visits wider, for a fuller map. The default output is unchanged."""
     rng = random.Random(seed)
+    all_places = PLACES + CITY_PLACES if city else PLACES
+    spread = 400 if city else 150
     areas = list(AREA_WEIGHTS)
     rows = []
     for _ in range(n_devices):
@@ -49,10 +85,10 @@ def generate(n_devices=3000, start=date(2025, 12, 1), days=7, seed=42):
         area = rng.choices(areas, weights=[AREA_WEIGHTS[a] for a in areas])[0]
         countries = HOME_COUNTRIES[area]
         home = rng.choices(list(countries), weights=list(countries.values()))[0]
-        places = [p for p in PLACES if p[0] == area]
+        places = [p for p in all_places if p[0] == area]
         for _ in range(rng.randint(1, 5)):
             _, place, group, lat, lng = rng.choice(places)
-            lat, lng = _jitter(rng, lat, lng)
+            lat, lng = _jitter(rng, lat, lng, spread)
             rows.append({
                 "device_id": device_id,
                 "home_country": home,
