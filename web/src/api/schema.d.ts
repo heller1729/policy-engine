@@ -337,11 +337,6 @@ export interface components {
             label: string;
             /** K */
             k: number;
-            /**
-             * K Review
-             * @default false
-             */
-            k_review: boolean;
             /** Group Shift */
             group_shift?: {
                 [key: string]: string;

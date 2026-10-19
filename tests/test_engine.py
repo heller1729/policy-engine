@@ -60,10 +60,17 @@ def test_thailand_grey_area_goes_to_aggregate_with_review(pdp):
     assert d.review is True
 
 
-def test_thailand_k_review_never_releases_full(pdp):
+def test_thailand_area_stats_follow_the_baseline(pdp):
     d = decide(pdp, 1, "public", "thailand", "tourism", "G5")
-    assert d.review is True
-    assert d.outcome == "Aggregate"
+    assert d.review is False
+    assert d.outcome == "Full"
+    assert d.k == 5
+
+
+def test_jurisdiction_k_is_a_policy_value(policy):
+    data = copy.deepcopy(policy.data)
+    data["jurisdictions"]["thailand"]["k"] = 12
+    assert DecisionPoint(Policy(data)).decide(Request(2, "government", "thailand", "tourism", "G5")).k == 12
 
 
 def test_us_blocks_ads_near_clinics(pdp):

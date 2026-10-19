@@ -173,7 +173,6 @@ export function PolicyPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-slate-800">{j.label}</span>
                     <span className="rounded bg-white px-1.5 py-0.5 text-[11px] text-slate-600">k = {j.k}</span>
-                    {j.k_review && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] text-amber-800">k to be set with counsel</span>}
                     {Object.entries(j.group_shift ?? {}).map(([from, to]) => (
                       <span key={from} className="rounded bg-white px-1.5 py-0.5 text-[11px] text-slate-600">
                         treats {from} as {to}

@@ -110,7 +110,6 @@ jurisdictions:
   thailand:
     label: Thailand (PDPA)
     k: 5
-    k_review: true
     group_shift: {G2: G1}
     rules:
       - id: TH_ADID_DEVICE_LEVEL

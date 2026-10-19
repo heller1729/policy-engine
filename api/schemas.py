@@ -151,7 +151,6 @@ class JurisdictionOut(BaseModel):
     id: str
     label: str
     k: int
-    k_review: bool = False
     group_shift: dict[str, str] = Field(default_factory=dict)
     rules: list[RuleOut] = Field(default_factory=list)
 
