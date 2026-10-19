@@ -251,7 +251,7 @@ Run (inside the `policyengenv` virtual environment, which is git ignored):
 
 ```
 python -m venv policyengenv
-policyengenv\Scripts\Activate.ps1      # PowerShell; Git Bash: source policyengenv/Scripts/activate
+policyengenv\Scripts\Activate.ps1      # PowerShell; cmd: policyengenv\Scripts\activate.bat; Git Bash: source policyengenv/Scripts/activate
 pip install -r requirements.txt
 python demo.py
 python -m pytest -q
