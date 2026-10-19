@@ -7,6 +7,8 @@ All data is synthetic. No real Irys or LocationMind data is used.
 ## Run it
 
 ```
+python -m venv policyengenv
+policyengenv\Scripts\Activate.ps1      # PowerShell; Git Bash: source policyengenv/Scripts/activate
 pip install -r requirements.txt
 python demo.py              # seven scenarios, including the Mecca case
 python demo.py --noise      # same, with the differential privacy module switched on
