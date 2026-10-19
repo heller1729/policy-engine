@@ -6,7 +6,7 @@ from fastapi.responses import PlainTextResponse
 
 from ..state import EngineState, get_state
 
-router = APIRouter()
+router = APIRouter(tags=["Audit log"])
 
 
 def _filtered(records, outcome, review, jurisdiction):
@@ -20,7 +20,7 @@ def _filtered(records, outcome, review, jurisdiction):
         yield r
 
 
-@router.get("/audit")
+@router.get("/audit", response_model=dict)
 def audit(
     outcome: Optional[str] = None,
     review: Optional[bool] = None,
@@ -40,7 +40,7 @@ def export(state: EngineState = Depends(get_state)):
                              headers={"Content-Disposition": "attachment; filename=audit.jsonl"})
 
 
-@router.get("/audit/{request_id}")
+@router.get("/audit/{request_id}", response_model=dict)
 def audit_record(request_id: str, state: EngineState = Depends(get_state)):
     for r in state.audit.records:
         if r["request"]["request_id"] == request_id:

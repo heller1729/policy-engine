@@ -4,7 +4,7 @@ from engine import DecisionPoint, Request
 from ..schemas import MatrixCell, MatrixIn, MatrixOut
 from ..state import EngineState, get_state
 
-router = APIRouter()
+router = APIRouter(tags=["Who sees what"])
 
 
 @router.post("/matrix", response_model=MatrixOut)

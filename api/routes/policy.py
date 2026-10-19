@@ -4,10 +4,10 @@ from engine import techniques
 from ..schemas import TechniqueOut
 from ..state import EngineState, get_state
 
-router = APIRouter()
+router = APIRouter(tags=["Policy"])
 
 
-@router.get("/policy")
+@router.get("/policy", response_model=dict)
 def policy(state: EngineState = Depends(get_state)):
     p = state.policy
     raw = p.data
