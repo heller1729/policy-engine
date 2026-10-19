@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 
+from ..schemas import AuditListOut
 from ..state import EngineState, get_state
 
 router = APIRouter(tags=["Audit log"])
@@ -20,7 +21,7 @@ def _filtered(records, outcome, review, jurisdiction):
         yield r
 
 
-@router.get("/audit", response_model=dict)
+@router.get("/audit", response_model=AuditListOut)
 def audit(
     outcome: Optional[str] = None,
     review: Optional[bool] = None,

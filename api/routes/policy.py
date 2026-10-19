@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from engine import techniques
-from ..schemas import TechniqueOut
+from ..schemas import PolicyOut, TechniqueOut
 from ..state import EngineState, get_state
 
 router = APIRouter(tags=["Policy"])
 
 
-@router.get("/policy", response_model=dict)
+@router.get("/policy", response_model=PolicyOut)
 def policy(state: EngineState = Depends(get_state)):
     p = state.policy
     raw = p.data
@@ -26,7 +26,14 @@ def policy(state: EngineState = Depends(get_state)):
         "purposes": list(raw["purposes"]),
         "thresholds": p.thresholds,
         "location_groups": [{"id": g, **conf} for g, conf in p.location_groups.items()],
-        "audience_matrix": p.audience_matrix,
+        "audience_matrix": {
+            "factor": p.audience_matrix.get("factor"),
+            "citation": p.audience_matrix["citation"],
+            "bands": [
+                {"tiers": b["tiers"], "label": b["label"], "cells": {r: b[r] for r in raw["requesters"]}}
+                for b in p.audience_matrix["bands"]
+            ],
+        },
         "jurisdictions": [{"id": j, **conf} for j, conf in p.jurisdictions.items()],
         "purpose_rules": p.purpose_rules,
         "techniques": p.techniques,

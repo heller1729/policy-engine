@@ -1,6 +1,6 @@
 # Policy Engine v0.2: Presentable Version Plan
 
-Status: in progress, Oct 19, 2026. Step 1 (API layer) done. Data stays synthetic.
+Status: in progress, Oct 19, 2026. Steps 1 (API layer) and 2 (web skeleton and request builder) done. Data stays synthetic.
 
 ## Goal
 
@@ -20,7 +20,7 @@ What a viewer should be able to do in the app:
 | :-- | :-- | :-- |
 | Engine | Existing `engine/` package, unchanged in behavior | Keeps the 22 tests and the invariants as they are |
 | API | FastAPI, Pydantic models, uvicorn | Python, same process as the engine, typed request and response models, free OpenAPI page |
-| Web | React, TypeScript, Vite, Tailwind, shadcn/ui | Looks finished with little effort, easy to keep consistent |
+| Web | React, TypeScript 5.9, Vite, Tailwind, TanStack Query, openapi-fetch, lucide-react | Small hand written components on Tailwind instead of shadcn/ui, which kept the setup simple. TypeScript stays on 5.9 because 7 breaks `openapi-typescript` |
 | Map | MapLibre GL with deck.gl `H3HexagonLayer`, `h3-js` | Draws the released H3 cells directly. No map API key needed (Carto or OpenFreeMap basemap) |
 | Charts | Recharts | Only needed for the row funnel and small summaries |
 | Serving | FastAPI serves the built web app | One command to run the whole thing for a presentation |
@@ -150,6 +150,10 @@ Each step ends with tests passing and a commit.
 * The IAB meeting was Oct 8, 2026, and v0.1 was well received. There is no fixed deadline for v0.2; it is presented as work in progress.
 * Build first. A Docker image comes later, once LocationMind wants to run it themselves.
 
+* The flow steps in the app use the Whimsical board colors (blue input and output, orange enforcement point, gray policy, pink decide, mint transforms), so the app and the diagram read as one thing.
+* The navigation only lists pages that exist. Pages are added as their build step lands.
+* Request state lives in the URL so the matrix page can link a cell into the request builder.
+
 ## Open questions
 
-* Should the matrix and pipeline views use the same colors as the Whimsical board, so the app and the diagram read as one thing?
+* None right now.
