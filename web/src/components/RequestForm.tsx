@@ -40,6 +40,8 @@ export function RequestForm({ value, onChange, policy, scenarios, summary, overr
     set({ overrides: empty ? null : next });
   };
   const current = scenarios.find((s) => !value.overrides && sameRequest(value, s));
+  const area = summary?.areas.find((a) => a.area === value.area);
+  const usual = area && policy.jurisdictions.find((j) => j.id === area.jurisdiction);
   const kDefault = policy.thresholds.k_default;
 
   return (
@@ -109,10 +111,20 @@ export function RequestForm({ value, onChange, policy, scenarios, summary, overr
           <select className={selectClass} value={value.area ?? ""} onChange={(e) => set({ area: e.target.value || null })}>
             <option value="">All areas</option>
             {summary?.areas.map((a) => (
-              <option key={a.area} value={a.area}>{a.area}</option>
+              <option key={a.area} value={a.area}>
+                {a.area} ({a.country})
+              </option>
             ))}
           </select>
         </Field>
+        {usual && usual.id !== value.jurisdiction && (
+          <p className="-mt-1 text-[11px] text-slate-500">
+            {area?.area} is usually under {usual.label}.{" "}
+            <button type="button" onClick={() => set({ jurisdiction: usual.id })} className="font-medium text-blue-600 hover:underline">
+              Use it
+            </button>
+          </p>
+        )}
       </div>
 
       <div className="space-y-3 border-t border-slate-200 pt-4">

@@ -125,4 +125,114 @@
   Because: Unknown jurisdiction 'brazil', no rules exist, failing safe
   Released rows: 0
 ==============================================================================
+8. Ad network asks for visitor counts near a reproductive health clinic in New York
+  Request: tier Lv 2, commercial, us, advertising, G2, area New York
+  Rules fired:
+     location_group  LOC_G2                             -> Aggregate [G2]
+     audience_matrix AUD_AREA_STATISTICS_COMMERCIAL     -> Full [D1]
+   * jurisdiction    US_SENSITIVE_GEOFENCE_ADS          -> Blocked [B3]
+   * purpose         ADS_NO_RED_LOCATION_TARGETING      -> Blocked [B3]
+  DECISION: Blocked
+  Because: CPRA and state laws: precise geolocation is sensitive; geofencing near healthcare banned in several states
+  Released rows: 0
+==============================================================================
+9. University study asks for commuter visit logs in London
+  Request: tier Lv 5, research, uk, tourism, G5, area London
+  Rules fired:
+     location_group  LOC_G5                             -> Full [G5]
+   * audience_matrix AUD_DEVICE_LOGS_RESEARCH           -> Masked [D1]
+  DECISION: Masked
+  Because: Who sees what proposal, first cut matrix
+  Enforcement:
+     place_check            [B3]  rows 1862 -> 873
+       withheld 317 rows at G1 places (Blocked: LOC_G1, UK_ART9_DEVICE_LEVEL)
+       withheld 332 rows at G2 places (Blocked: LOC_G2, UK_ART9_DEVICE_LEVEL)
+       withheld 340 rows at G3 places (Aggregate: LOC_G3)
+     hash_ids               [A2]  rows 873 -> 873
+     drop_sensitive_rows    [B2, B3]  rows 873 -> 873
+     coarsen_time           [E2]  rows 873 -> 873
+  Released rows: 873
+      {'device_id': 'h_f99abb4bc9bb6cb5', 'home_country': 'GBR', 'area': 'London', 'place': 'Hyde Park', 'place_group': 'G5', 'h3_cell': '89195da4babffff', 'date': '2025-12-07'}
+      {'device_id': 'h_f99abb4bc9bb6cb5', 'home_country': 'GBR', 'area': 'London', 'place': "King's Cross station", 'place_group': 'G5', 'h3_cell': '89195da4d8fffff', 'date': '2025-12-03'}
+      {'device_id': 'h_f99abb4bc9bb6cb5', 'home_country': 'GBR', 'area': 'London', 'place': "King's Cross station", 'place_group': 'G5', 'h3_cell': '89195da4dbbffff', 'date': '2025-12-06'}
+      {'device_id': 'h_223040e67792e271', 'home_country': 'GBR', 'area': 'London', 'place': 'Hyde Park', 'place_group': 'G5', 'h3_cell': '89195da4bbbffff', 'date': '2025-12-07'}
+      {'device_id': 'h_c87c10769ffa408a', 'home_country': 'IND', 'area': 'London', 'place': 'Hyde Park', 'place_group': 'G5', 'h3_cell': '89195da4babffff', 'date': '2025-12-03'}
+      {'device_id': 'h_c87c10769ffa408a', 'home_country': 'IND', 'area': 'London', 'place': 'Hyde Park', 'place_group': 'G5', 'h3_cell': '89195da4bbbffff', 'date': '2025-12-02'}
+      ... 867 more
+==============================================================================
+10. Paris tourism office asks for visitor trends at Notre Dame
+  Request: tier Lv 3, government, eu, tourism, G1, area Paris
+  Rules fired:
+   * location_group  LOC_G1                             -> Aggregate [G1]
+     audience_matrix AUD_BEHAVIORAL_TRENDS_GOVERNMENT   -> Full [D1]
+  DECISION: Aggregate
+  Because: GDPR Art 9(1); Thailand PDPA; Japan APPI; Saudi PDPL (religion and health named sensitive)
+  Enforcement:
+     place_check            [B3]  rows 1734 -> 1734
+     aggregate_h3           [E1, E4]  rows 1734 -> 280
+     suppress_small_cells   [E3]  rows 280 -> 60
+  Released rows: 60
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-01', 'home_country': 'FRA', 'unique_devices': 31}
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-02', 'home_country': 'FRA', 'unique_devices': 22}
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-03', 'home_country': 'FRA', 'unique_devices': 19}
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-04', 'home_country': 'CHN', 'unique_devices': 5}
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-04', 'home_country': 'FRA', 'unique_devices': 28}
+      {'h3_cell': '871fb4644ffffff', 'date': '2025-12-04', 'home_country': 'GBR', 'unique_devices': 5}
+      ... 54 more
+==============================================================================
+11. Advertiser asks for device logs near an addiction treatment centre in Paris
+  Request: tier Lv 5, commercial, eu, advertising, G2, area Paris
+  Rules fired:
+   * location_group  LOC_G2                             -> Blocked [G2]
+     audience_matrix AUD_DEVICE_LOGS_COMMERCIAL         -> Masked [D1]
+   * jurisdiction    EU_ART9_DEVICE_LEVEL               -> Blocked [B3]
+   * purpose         ADS_NO_RED_LOCATION_TARGETING      -> Blocked [B3]
+  DECISION: Blocked
+  Because: CJEU C-252/21 Meta v Bundeskartellamt (2023); CJEU C-21/23 Lindenapotheke (2024)
+  Released rows: 0
+==============================================================================
+12. Research lab asks for pseudonymous visit logs in Tokyo
+  Request: tier Lv 4, research, japan, tourism, G5, area Tokyo
+  Rules fired:
+     location_group  LOC_G5                             -> Full [G5]
+     audience_matrix AUD_DEVICE_LOGS_RESEARCH           -> Masked [D1]
+   * jurisdiction    JP_THIRD_PARTY_PROVISION           -> Aggregate [A6] (review)
+  DECISION: Aggregate  (flagged for human review)
+  Because: APPI: third party provision of personally referable information needs consent confirmation
+  Enforcement:
+     place_check            [B3]  rows 1843 -> 1225
+       withheld 307 rows at G1 places (Blocked: LOC_G1)
+       withheld 311 rows at G2 places (Blocked: LOC_G2)
+     aggregate_h3           [E1, E4]  rows 1225 -> 177
+     suppress_small_cells   [E3]  rows 177 -> 52
+  Released rows: 52
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-01', 'home_country': 'CHN', 'unique_devices': 8}
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-01', 'home_country': 'JPN', 'unique_devices': 32}
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-01', 'home_country': 'KOR', 'unique_devices': 5}
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-02', 'home_country': 'JPN', 'unique_devices': 25}
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-03', 'home_country': 'CHN', 'unique_devices': 8}
+      {'h3_cell': '872f5a32dffffff', 'date': '2025-12-03', 'home_country': 'JPN', 'unique_devices': 22}
+      ... 46 more
+==============================================================================
+13. Internal data team pulls raw Tokyo logs for pipeline checks
+  Request: tier Lv 4, internal, japan, cybersecurity, G5, area Tokyo
+  Rules fired:
+   * location_group  LOC_G5                             -> Full [G5]
+   * audience_matrix AUD_DEVICE_LOGS_INTERNAL           -> Full [D1]
+  DECISION: Full
+  Because: No special basis
+  Enforcement:
+     place_check            [B3]  rows 1843 -> 913
+       withheld 307 rows at G1 places (Blocked: LOC_G1)
+       withheld 311 rows at G2 places (Blocked: LOC_G2)
+       withheld 312 rows at G3 places (Aggregate: LOC_G3)
+  Released rows: 913
+      {'device_id': '0e108913-5aeb-4cd9-a56a-e9713fdfefe6', 'home_country': 'USA', 'area': 'Tokyo', 'place': 'Tokyo station', 'place_group': 'G5', 'h3_cell': '892f5a32d87ffff', 'date': '2025-12-05', 'hour': 15}
+      {'device_id': '0e108913-5aeb-4cd9-a56a-e9713fdfefe6', 'home_country': 'USA', 'area': 'Tokyo', 'place': 'Shinjuku Gyoen', 'place_group': 'G5', 'h3_cell': '892f5aadb2bffff', 'date': '2025-12-03', 'hour': 13}
+      {'device_id': 'faa392cb-b41e-4adb-aac6-286853cc2fff', 'home_country': 'KOR', 'area': 'Tokyo', 'place': 'Shinjuku Gyoen', 'place_group': 'G5', 'h3_cell': '892f5aadb67ffff', 'date': '2025-12-07', 'hour': 11}
+      {'device_id': 'faa392cb-b41e-4adb-aac6-286853cc2fff', 'home_country': 'KOR', 'area': 'Tokyo', 'place': 'Tokyo station', 'place_group': 'G5', 'h3_cell': '892f5a32d87ffff', 'date': '2025-12-01', 'hour': 15}
+      {'device_id': 'afbd33ed-28d9-4929-a0f8-2355d2ca8d3e', 'home_country': 'JPN', 'area': 'Tokyo', 'place': 'Shibuya crossing', 'place_group': 'G5', 'h3_cell': '892f5aad92fffff', 'date': '2025-12-07', 'hour': 0}
+      {'device_id': 'afbd33ed-28d9-4929-a0f8-2355d2ca8d3e', 'home_country': 'JPN', 'area': 'Tokyo', 'place': 'Tokyo station', 'place_group': 'G5', 'h3_cell': '892f5a32d87ffff', 'date': '2025-12-02', 'hour': 5}
+      ... 907 more
+==============================================================================
 Audit log written to out/audit.jsonl

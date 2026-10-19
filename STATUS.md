@@ -8,7 +8,7 @@ Read `CLAUDE.md` first for standing context. This file is the running log. At th
 
 ## Where things stand
 
-Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API plus web UI, mock data) is in progress; the API and the request builder with run results and map are done. Seven demo scenarios, 45 passing tests, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
+Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API plus web UI, mock data) is in progress; the API and the request builder with run results and map are done. 13 demo scenarios across nine cities and all eight jurisdictions, 58 passing tests, audit log, swappable technique modules, Laplace noise as an optional module. Architecture board has step labels and a legend. Next version is about supporting and selecting between many privacy and encryption techniques, per Dr. Matsuo's feedback.
 
 ---
 
@@ -94,6 +94,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Found: Masked output for the Dubai advertiser request includes device rows at a G3 place (Children's hospital, city dataset). `drop_sensitive_rows` only drops G1 and G2. Needs a policy call, logged under open decisions and known gaps.
 * Fixed (Pratham's call, both options): `sensitive_groups` now G1 to G4, and a place catalog (`policy/place_catalog.yaml`, `engine/catalog.py`) so each row's location group comes from its coordinates. The PEP runs a `place_check` step that withholds rows whose own group gets a stricter decision, with rules in the audit record. Decisions for all seven scenarios unchanged; released numbers changed for scenario 4 (68 to 30 cells, temple rows withheld from an advertiser) and 5 (117 to 89 cells, hospital rows withheld). `sample_demo_output.txt` regenerated. 50 tests (27 engine, 23 API). Checked in Chrome: Dubai advertiser on city data now withholds 1,082 G1 and 529 G3 rows.
 * Asked: why only five cities. They mirror Phase I (Saudi Arabia, UAE, Qatar) and JICA Thailand. US, EU, UK and Japan exist as jurisdictions only; offered to add synthetic cities for them if wanted.
+* Added one city per remaining jurisdiction (New York, London, Paris, Tokyo) with mixed G1 to G5 places, from a separate random stream so the original rows are unchanged (checked by hash and a test). Six new scenarios (8 to 13) covering the US, UK, EU and Japan rules, the place check, and the first Full release. Area dropdown shows the country and offers the usual jurisdiction. 58 tests (29 engine, 29 API). Scenarios 1 to 7 output unchanged.
 * Next: step 4, Who sees what page (matrix and compare mode) and the Policy page.
 
 ### Oct 6, 2026

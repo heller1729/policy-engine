@@ -29,3 +29,15 @@ places:
   - {name: "Hamad hospital", area: Doha, group: G1, lat: 25.293, lng: 51.503}
   - {name: "Siriraj hospital", area: Bangkok, group: G1, lat: 13.759, lng: 100.485}
   - {name: "Wat Arun", area: Bangkok, group: G1, lat: 13.744, lng: 100.489}
+  - {name: "Midtown hospital", area: New York, group: G1, lat: 40.7644, lng: -73.955}
+  - {name: "Reproductive health clinic", area: New York, group: G2, lat: 40.739, lng: -73.99}
+  - {name: "Federal office building", area: New York, group: G4, lat: 40.7155, lng: -74.0039}
+  - {name: "Riverside hospital", area: London, group: G1, lat: 51.4986, lng: -0.1186}
+  - {name: "Trade union office", area: London, group: G2, lat: 51.5246, lng: -0.134}
+  - {name: "Primary school", area: London, group: G3, lat: 51.54, lng: -0.143}
+  - {name: "Notre Dame", area: Paris, group: G1, lat: 48.853, lng: 2.3499}
+  - {name: "Addiction treatment centre", area: Paris, group: G2, lat: 48.84, lng: 2.37}
+  - {name: "Defence ministry", area: Paris, group: G4, lat: 48.835, lng: 2.279}
+  - {name: "Meiji Shrine", area: Tokyo, group: G1, lat: 35.6764, lng: 139.6993}
+  - {name: "Elementary school", area: Tokyo, group: G3, lat: 35.662, lng: 139.73}
+  - {name: "Political party office", area: Tokyo, group: G2, lat: 35.676, lng: 139.744}

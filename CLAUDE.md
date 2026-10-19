@@ -240,14 +240,14 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `engine/techniques.py` | Technique classes plus `REGISTRY` and `@register` |
 | `engine/audit.py` | Writes one JSON line per request to `out/audit.jsonl` |
 | `synthetic.py` | Synthetic visit data |
-| `scenarios.py` | The seven demo scenarios with expected outcomes, shared by demo, API and tests |
+| `scenarios.py` | The 13 demo scenarios with expected outcomes, shared by demo, API and tests |
 | `demo.py` | Runs the scenarios. `--noise` turns on Laplace noise, `--only N` runs one |
 | `ask.py` | Single request from the command line, `--json` for the audit record |
 | `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`, `export_openapi.py`). Serves `web/dist` when built, with client side routes falling back to index.html |
 | `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
 | `serve.py` | Starts the API on http://localhost:8000 |
-| `tests/test_engine.py` | 27 engine tests |
-| `tests/test_api.py` | 23 API tests |
+| `tests/test_engine.py` | 29 engine tests |
+| `tests/test_api.py` | 29 API tests (one per scenario plus 16) |
 | `docs/` | Design doc, notes, proposal, spreadsheet, memo, inventory, legend |
 
 Run (inside the `policyengenv` virtual environment, which is git ignored):
@@ -313,7 +313,9 @@ To add a technique: subclass `Technique`, set `name`, `factor`, `description`, i
 
 ### Synthetic data (synthetic.py)
 
-Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `area` (Mecca, Riyadh, Dubai, Doha, Bangkok), `place`, `place_group` (G1 to G5), `lat`, `lng`, `h3_cell` (resolution 9), `date` (2025-12-01 to 07), `hour`. Defaults: 3000 devices, seed 42, 1 to 5 visits each. Each area has at least one G5 place and most have a G1 place; Riyadh also has G3 and G4. Rare nationalities (ISL, FJI, NOR, CHL, EST, URY) exist so suppression is visible.
+Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `area` (Mecca, Riyadh, Dubai, Doha, Bangkok, New York, London, Paris, Tokyo), `place`, `place_group` (G1 to G5), `lat`, `lng`, `h3_cell` (resolution 9), `date` (2025-12-01 to 07), `hour`. Defaults: 3000 devices, seed 42, 1 to 5 visits each. Each area has at least one G5 place and most have a G1 place; Riyadh also has G3 and G4. Rare nationalities (ISL, FJI, NOR, CHL, EST, URY) exist so suppression is visible.
+
+World cities: one city per jurisdiction that had no data (New York for US, London for UK, Paris for EU, Tokyo for Japan), in `WORLD_PLACES`. Each has three G5 places and a mix of G1 to G4 (hospital or worship site, a G2 clinic, union office or party office, a school or a defence or federal building). They come from a separate random stream (`seed + 1000`, `0.8 * n_devices` devices) appended after the original rows, so the original five cities' rows are identical with or without them (`generate(world=False)` skips them; a test checks this). `AREA_INFO` maps each area to its country and usual jurisdiction; the request form offers to switch to it.
 
 City dataset: `generate(city=True)` adds `CITY_PLACES` (about six extra public places per area, approximate coordinates, including G1 and G3 places in Dubai, Mecca and Bangkok), spreads visits 400 m instead of 150 m, and the API uses 8000 devices. Start it with `python serve.py --city` (sets `POLICY_ENGINE_DATA=city`). It exists for a fuller map; demo numbers differ, so the default dataset stays the reference for tests and the scenario table.
 
@@ -328,10 +330,16 @@ City dataset: `generate(city=True)` adds `CITY_PLACES` (about six extra public p
 | 5 | Lv 7, internal, saudi_arabia, cybersecurity, G4, Riyadh | Aggregate | G4 caps even internal. Place check withholds 625 hospital rows (LOC_G1 blocks device level for everyone); 89 cells released |
 | 6 | Lv 3, research, qatar, tourism, G5, Doha | Aggregate | Matrix |
 | 7 | Lv 2, government, brazil, tourism, G5 | Blocked | Unknown jurisdiction, fail safe |
+| 8 | Lv 2, commercial, us, advertising, G2, New York | Blocked | US_SENSITIVE_GEOFENCE_ADS and ADS_NO_RED_LOCATION_TARGETING, even for counts |
+| 9 | Lv 5, research, uk, tourism, G5, London | Masked | Matrix. Place check withholds G1, G2, G3 rows (1862 to 873) |
+| 10 | Lv 3, government, eu, tourism, G1, Paris | Aggregate | LOC_G1 allows counts. 1734 rows to 280 cells to 60 |
+| 11 | Lv 5, commercial, eu, advertising, G2, Paris | Blocked | LOC_G2, EU_ART9_DEVICE_LEVEL, ADS_NO_RED_LOCATION_TARGETING |
+| 12 | Lv 4, research, japan, tourism, G5, Tokyo | Aggregate, review | JP_THIRD_PARTY_PROVISION. Place check withholds G1, G2 rows |
+| 13 | Lv 4, internal, japan, cybersecurity, G5, Tokyo | Full | Only Full example. Raw IDs to internal; place check still withholds G1, G2, G3 rows (1843 to 913) |
 
 ### Tests
 
-22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Plus 5 for the place catalog and masking: drop list covers G1 to G4, catalog agrees with the synthetic labels, missing coordinates fail safe to G1, place check withholds by each row's own group with the rules recorded, and an exhaustive per row check (tiers 4 to 7, every requester, jurisdiction and purpose over Riyadh) that no released row is looser than its own group's decision. `sample_demo_output.txt` is the reference demo output; regenerate it with `python demo.py > sample_demo_output.txt` when a result changes on purpose. Run tests before every commit. Keep the exhaustive tests.
+22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Plus 5 for the place catalog and masking: drop list covers G1 to G4, catalog agrees with the synthetic labels, missing coordinates fail safe to G1, place check withholds by each row's own group with the rules recorded, and an exhaustive per row check (tiers 4 to 7, every requester, jurisdiction and purpose over Riyadh) that no released row is looser than its own group's decision. Plus 2 for the world cities: original rows unchanged by them, and every jurisdiction in the policy has a city. `sample_demo_output.txt` is the reference demo output; regenerate it with `python demo.py > sample_demo_output.txt` when a result changes on purpose. Run tests before every commit. Keep the exhaustive tests.
 
 API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
 

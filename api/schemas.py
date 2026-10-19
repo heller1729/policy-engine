@@ -203,6 +203,8 @@ class PlaceOut(BaseModel):
 
 class AreaSummaryOut(BaseModel):
     area: str
+    country: str
+    jurisdiction: str
     rows: int
     devices: int
     center: list[float]
