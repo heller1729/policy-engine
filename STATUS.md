@@ -21,7 +21,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 5. Fix the order of noise and suppression, and handle unit of privacy (E6, user level).
 6. Fix the Saudi "agrees" line in `docs/Policy_Engine_Design.md`.
 7. Add a destination attribute for cross border transfers (D2).
-8. Add a place catalog so the location group is looked up, not supplied by the request.
+8. Replace the synthetic place catalog with LocationMind's real place list (polygons or H3 cells), and confirm the buffer size with counsel.
 9. Make the Regional overrides tab machine readable and generate `policy.yaml` from it.
 10. Connect to real data in Snowflake once access is granted.
 
@@ -52,7 +52,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Whether contractual constraints (F) stay their own set.
 * Thailand k value, to be set with counsel.
 * Exact place lists per location group and per country shifts.
-* Should Masked output also drop rows at G3 and G4 places (add them to `sensitive_groups`), or should the engine look up the group per row? Today a G5 request over an area can release device rows at a school or children's hospital.
+* Place catalog buffer: 600 m for now. Needs a real number per group, and possibly per country.
 
 ---
 
@@ -92,6 +92,8 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Step 2 done: `web/` React app (Vite, TypeScript 5.9, Tailwind). Request builder with demo scenario picker, the five attributes plus area, a what if panel (k, noise, epsilon), live decision banner, flow steps in board colors, a strictness ladder (Full to Blocked) showing where each rule capped, rule cards grouped by step with factor chips and citations, and the technique plan. Typed API responses for policy, audit and data summary; OpenAPI types generated into the web app. FastAPI serves the built app with client side route fallback. Checked in Chrome: Mecca case, Thailand grey area, unknown jurisdiction with a rejected override.
 * Step 3 done: Run request button, row funnel, two synced maps (input vs released, suppressed cells dashed), released rows table, audit record with copy. City dataset behind `python serve.py --city` for a fuller map; default data unchanged. 45 tests (22 engine, 23 API). Checked in Chrome: Mecca counts (city data 6,492 rows to 585 cells to 296), Dubai Masked (hashed IDs, no hour), Mecca advertiser Blocked.
 * Found: Masked output for the Dubai advertiser request includes device rows at a G3 place (Children's hospital, city dataset). `drop_sensitive_rows` only drops G1 and G2. Needs a policy call, logged under open decisions and known gaps.
+* Fixed (Pratham's call, both options): `sensitive_groups` now G1 to G4, and a place catalog (`policy/place_catalog.yaml`, `engine/catalog.py`) so each row's location group comes from its coordinates. The PEP runs a `place_check` step that withholds rows whose own group gets a stricter decision, with rules in the audit record. Decisions for all seven scenarios unchanged; released numbers changed for scenario 4 (68 to 30 cells, temple rows withheld from an advertiser) and 5 (117 to 89 cells, hospital rows withheld). `sample_demo_output.txt` regenerated. 50 tests (27 engine, 23 API). Checked in Chrome: Dubai advertiser on city data now withholds 1,082 G1 and 529 G3 rows.
+* Asked: why only five cities. They mirror Phase I (Saudi Arabia, UAE, Qatar) and JICA Thailand. US, EU, UK and Japan exist as jurisdictions only; offered to add synthetic cities for them if wanted.
 * Next: step 4, Who sees what page (matrix and compare mode) and the Policy page.
 
 ### Oct 6, 2026

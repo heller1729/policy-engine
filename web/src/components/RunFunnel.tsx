@@ -1,7 +1,15 @@
-import type { RunResult } from "../api/client";
+import type { RunResult, Step } from "../api/client";
 import { FactorChips } from "./FactorChip";
 
-type Row = { label: string; factor?: string | null; count: number; unit: string; removed?: number; kind: "input" | "step" | "out" };
+type Row = {
+  label: string;
+  factor?: string | null;
+  count: number;
+  unit: string;
+  removed?: number;
+  withheld?: Step["withheld"];
+  kind: "input" | "step" | "out";
+};
 
 function buildRows(run: RunResult): Row[] {
   let unit = "rows";
@@ -15,6 +23,7 @@ function buildRows(run: RunResult): Row[] {
       count: s.rows_out,
       unit,
       removed: before === unit && s.rows_out < s.rows_in ? s.rows_in - s.rows_out : undefined,
+      withheld: s.withheld,
       kind: "step",
     });
   }
@@ -35,7 +44,7 @@ export function RunFunnel({ run }: { run: RunResult }) {
     <div>
       <ul className="space-y-2">
         {rows.map((r, i) => (
-          <li key={`${r.label}-${i}`} className="grid grid-cols-[180px_1fr] items-center gap-3">
+          <li key={`${r.label}-${i}`} className="grid grid-cols-[180px_1fr] items-center gap-x-3 gap-y-1">
             <div className="flex items-center gap-1.5 truncate">
               <span className={`text-xs ${r.kind === "step" ? "font-mono text-slate-700" : "font-semibold text-slate-800"}`}>
                 {r.label}
@@ -54,6 +63,16 @@ export function RunFunnel({ run }: { run: RunResult }) {
                 {r.removed ? <span className="ml-1 text-rose-600">({r.removed} removed)</span> : null}
               </span>
             </div>
+            {r.withheld && Object.keys(r.withheld).length > 0 && (
+              <ul className="col-start-2 space-y-0.5">
+                {Object.entries(r.withheld).map(([group, w]) => (
+                  <li key={group} className="text-[11px] text-slate-500">
+                    Withheld {w.rows.toLocaleString()} rows at {group} places: {w.cap} by{" "}
+                    <span className="font-mono">{w.rules.join(", ")}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>

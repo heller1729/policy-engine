@@ -2,7 +2,7 @@
 
 from fastapi import HTTPException, Request as HttpRequest
 
-from engine import AuditLog, Policy, PolicyError
+from engine import AuditLog, PlaceCatalog, Policy, PolicyError
 from synthetic import generate
 
 
@@ -12,6 +12,7 @@ class EngineState:
         self.city = city
         self.data = generate(n_devices=8000 if city else 3000, seed=seed, city=city)
         self.audit = AuditLog(audit_path)
+        self.catalog = PlaceCatalog.load()
         self.noise_seed = 7
 
     def policy_for(self, overrides):

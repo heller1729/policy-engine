@@ -108,7 +108,7 @@ Each rule in the YAML carries a factor ID and a citation, and both are written t
 
 * The policy file is written by hand from the spreadsheet. The spreadsheet is written for people (prose cells), so generating the YAML automatically needs a machine readable version of the overrides tab first.
 * Cross border transfer is folded into the Saudi localization rule. A separate destination attribute would let the engine handle transfers properly.
-* The location group is supplied with the request. In a real system it would be looked up from a place catalog. The `drop_sensitive_rows` step still removes G1 and G2 rows inside the requested area as a safety net.
+* Each row's location group is looked up from `policy/place_catalog.yaml` by distance to a sensitive place (600 m buffer). Rows whose own group would get a stricter decision are withheld before any technique runs. The catalog is synthetic; real use needs LocationMind's place list. `drop_sensitive_rows` still removes G1 to G4 rows by label as a backup.
 * `laplace_noise` runs after suppression, so a noisy count can come out under k. The right order and the privacy budget need their own design against NIST SP 800-226.
 * The data subject audience (own data via a rights request) is not modelled yet.
 

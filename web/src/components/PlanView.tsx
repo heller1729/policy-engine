@@ -11,9 +11,6 @@ export function PlanView({ decision, tier, deviceLevelFrom }: Props) {
   if (decision.outcome === "Blocked") {
     return <p className="text-sm text-slate-500">Nothing runs and nothing is released.</p>;
   }
-  if (!decision.plan.length) {
-    return <p className="text-sm text-slate-500">No transform. The scoped rows are released as they are.</p>;
-  }
   return (
     <div className="space-y-3">
       {tier < deviceLevelFrom && (
@@ -22,6 +19,18 @@ export function PlanView({ decision, tier, deviceLevelFrom }: Props) {
         </p>
       )}
       <ol className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <li className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[11px] font-semibold text-white">0</span>
+            <span className="font-mono text-xs font-semibold text-orange-900">place_check</span>
+            <span className="ml-auto">
+              <FactorChips factor="B3" />
+            </span>
+          </div>
+          <p className="mt-1.5 text-xs text-orange-900/80">
+            Looks up each row's location group from the place catalog and withholds rows whose own group gets a stricter decision
+          </p>
+        </li>
         {decision.plan.map((name, i) => {
           const t = info.get(name);
           return (

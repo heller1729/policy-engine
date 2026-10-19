@@ -18,6 +18,7 @@
   DECISION: Aggregate
   Because: GDPR Art 9(1); Thailand PDPA; Japan APPI; Saudi PDPL (religion and health named sensitive)
   Enforcement:
+     place_check            [B3]  rows 2373 -> 2373
      aggregate_h3           [E1, E4]  rows 2373 -> 65
      suppress_small_cells   [E3]  rows 65 -> 56
   Released rows: 56
@@ -37,8 +38,10 @@
   DECISION: Masked
   Because: Who sees what proposal, first cut matrix
   Enforcement:
-     hash_ids               [A2]  rows 1702 -> 1702
-     drop_sensitive_rows    [B2, B3]  rows 1702 -> 854
+     place_check            [B3]  rows 1702 -> 854
+       withheld 848 rows at G1 places (Blocked: LOC_G1, ADS_NO_RED_LOCATION_TARGETING)
+     hash_ids               [A2]  rows 854 -> 854
+     drop_sensitive_rows    [B2, B3]  rows 854 -> 854
      coarsen_time           [E2]  rows 854 -> 854
   Released rows: 854
       {'device_id': 'h_b874d4ea2b8f0036', 'home_country': 'GBR', 'area': 'Dubai', 'place': 'Dubai Mall', 'place_group': 'G5', 'h3_cell': '8943a13686fffff', 'date': '2025-12-02'}
@@ -59,16 +62,18 @@
   DECISION: Aggregate  (flagged for human review)
   Because: Thailand PDPA: device and ad IDs are personal data; consent is the primary lawful basis (Tilleke & Gibbins 2026)
   Enforcement:
-     aggregate_h3           [E1, E4]  rows 1544 -> 123
-     suppress_small_cells   [E3]  rows 123 -> 68
-  Released rows: 68
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-01', 'home_country': 'CHN', 'unique_devices': 5}
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-01', 'home_country': 'THA', 'unique_devices': 17}
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'CHN', 'unique_devices': 6}
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'JPN', 'unique_devices': 5}
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-02', 'home_country': 'THA', 'unique_devices': 17}
-      {'h3_cell': '8764a4b11ffffff', 'date': '2025-12-03', 'home_country': 'THA', 'unique_devices': 14}
-      ... 62 more
+     place_check            [B3]  rows 1544 -> 776
+       withheld 768 rows at G1 places (Blocked: LOC_G1, ADS_NO_RED_LOCATION_TARGETING)
+     aggregate_h3           [E1, E4]  rows 776 -> 47
+     suppress_small_cells   [E3]  rows 47 -> 30
+  Released rows: 30
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-01', 'home_country': 'CHN', 'unique_devices': 14}
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-01', 'home_country': 'DEU', 'unique_devices': 5}
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-01', 'home_country': 'JPN', 'unique_devices': 16}
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-01', 'home_country': 'THA', 'unique_devices': 68}
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-01', 'home_country': 'USA', 'unique_devices': 9}
+      {'h3_cell': '8764a4ba0ffffff', 'date': '2025-12-02', 'home_country': 'CHN', 'unique_devices': 16}
+      ... 24 more
 ==============================================================================
 5. Internal team, cybersecurity, raw data near a defence site
   Request: tier Lv 7, internal, saudi_arabia, cybersecurity, G4, area Riyadh
@@ -78,16 +83,18 @@
   DECISION: Aggregate
   Because: Strava heatmap exposure of military bases (2018); critical infrastructure protection rules
   Enforcement:
-     aggregate_h3           [E1, E4]  rows 2517 -> 255
-     suppress_small_cells   [E3]  rows 255 -> 117
-  Released rows: 117
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'EGY', 'unique_devices': 7}
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'IND', 'unique_devices': 13}
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'PAK', 'unique_devices': 5}
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-01', 'home_country': 'SAU', 'unique_devices': 63}
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-02', 'home_country': 'EGY', 'unique_devices': 9}
-      {'h3_cell': '875355d30ffffff', 'date': '2025-12-02', 'home_country': 'GBR', 'unique_devices': 6}
-      ... 111 more
+     place_check            [B3]  rows 2517 -> 1892
+       withheld 625 rows at G1 places (Blocked: LOC_G1)
+     aggregate_h3           [E1, E4]  rows 1892 -> 206
+     suppress_small_cells   [E3]  rows 206 -> 89
+  Released rows: 89
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-01', 'home_country': 'GBR', 'unique_devices': 7}
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-01', 'home_country': 'IND', 'unique_devices': 17}
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-01', 'home_country': 'PAK', 'unique_devices': 5}
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-01', 'home_country': 'SAU', 'unique_devices': 48}
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-01', 'home_country': 'USA', 'unique_devices': 5}
+      {'h3_cell': '875355d31ffffff', 'date': '2025-12-02', 'home_country': 'EGY', 'unique_devices': 5}
+      ... 83 more
 ==============================================================================
 6. Research partner asks for movement trends in Doha
   Request: tier Lv 3, research, qatar, tourism, G5, area Doha
@@ -97,6 +104,7 @@
   DECISION: Aggregate
   Because: Who sees what proposal, first cut matrix
   Enforcement:
+     place_check            [B3]  rows 829 -> 829
      aggregate_h3           [E1, E4]  rows 829 -> 66
      suppress_small_cells   [E3]  rows 66 -> 37
   Released rows: 37

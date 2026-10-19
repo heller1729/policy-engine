@@ -53,7 +53,8 @@ def test_unknown_attribute_is_blocked_not_an_error(client):
 
 def test_mecca_counts_funnel_and_map(client):
     r = client.post("/api/request", json=body()).json()
-    assert [(s["rows_in"], s["rows_out"]) for s in r["steps"]] == [(2373, 65), (65, 56)]
+    assert [(s["rows_in"], s["rows_out"]) for s in r["steps"]] == [(2373, 2373), (2373, 65), (65, 56)]
+    assert r["steps"][0]["technique"] == "place_check"
     assert r["map"]["released_kind"] == "unique_devices"
     assert r["map"]["suppressed"]
     assert all(row["unique_devices"] >= r["decision"]["k"] for row in r["released"]["rows"])

@@ -55,8 +55,8 @@ def build_map(run) -> MapOut:
     plan = run.decision.plan
     if "suppress_small_cells" in plan:
         i = plan.index("suppress_small_cells")
-        before = run.stages[i - 1] if i > 0 else run.scoped
-        after = run.stages[i]
+        before = run.stages[i]  # stages[0] is the place check, so plan step i is stages[i + 1]
+        after = run.stages[i + 1]
         kept = {(r["h3_cell"], r["date"], r["home_country"]) for r in after}
         suppressed = _count_cells(
             r for r in before if (r["h3_cell"], r["date"], r["home_country"]) not in kept
@@ -85,7 +85,7 @@ def run_request(
     state: EngineState = Depends(get_state),
 ):
     policy = state.policy_for(body.overrides)
-    pep = EnforcementPoint(policy, state.data, state.audit, seed=state.noise_seed)
+    pep = EnforcementPoint(policy, state.data, state.audit, seed=state.noise_seed, catalog=state.catalog)
     run = pep.run(to_request(body), trace=True)
     return RunOut(
         decision=decision_out(run.decision),
