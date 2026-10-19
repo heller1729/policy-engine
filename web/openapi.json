@@ -794,11 +794,6 @@
             "type": "integer",
             "title": "K"
           },
-          "k_review": {
-            "type": "boolean",
-            "title": "K Review",
-            "default": false
-          },
           "group_shift": {
             "additionalProperties": {
               "type": "string"

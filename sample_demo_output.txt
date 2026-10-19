@@ -58,7 +58,6 @@
      location_group  LOC_G5                             -> Full [G5]
      audience_matrix AUD_DEVICE_LOGS_COMMERCIAL         -> Masked [D1]
    * jurisdiction    TH_ADID_DEVICE_LEVEL               -> Aggregate [A2] (review)
-  Note: k for Thailand (PDPA) still to be confirmed with counsel
   DECISION: Aggregate  (flagged for human review)
   Because: Thailand PDPA: device and ad IDs are personal data; consent is the primary lawful basis (Tilleke & Gibbins 2026)
   Enforcement:

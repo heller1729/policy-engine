@@ -42,7 +42,8 @@ export function RequestForm({ value, onChange, policy, scenarios, summary, overr
   const current = scenarios.find((s) => !value.overrides && sameRequest(value, s));
   const area = summary?.areas.find((a) => a.area === value.area);
   const usual = area && policy.jurisdictions.find((j) => j.id === area.jurisdiction);
-  const kDefault = policy.thresholds.k_default;
+  const jurisdiction = policy.jurisdictions.find((j) => j.id === value.jurisdiction);
+  const kPolicy = jurisdiction?.k ?? policy.thresholds.k_default;
 
   return (
     <div className="space-y-5">
@@ -141,11 +142,11 @@ export function RequestForm({ value, onChange, policy, scenarios, summary, overr
           )}
         </div>
         <p className="text-[11px] text-slate-400">Overrides can only tighten the policy.</p>
-        <Field label={`Minimum k (policy default ${kDefault})`}>
+        <Field label={`k for this request (policy value ${kPolicy})`} hint="Each jurisdiction's k is set in policy.yaml. Here it can only go up.">
           <input
             type="number"
-            min={kDefault}
-            placeholder={String(kDefault)}
+            min={kPolicy}
+            placeholder={String(kPolicy)}
             className={selectClass}
             value={overrides.k_min ?? ""}
             onChange={(e) => setOverride({ k_min: e.target.value === "" ? null : Number(e.target.value) })}

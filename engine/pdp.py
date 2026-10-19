@@ -68,9 +68,6 @@ class DecisionPoint:
         # Thresholds
         k = jur.get("k", p.thresholds["k_default"])
         review = any(h.review for h in hits)
-        if jur.get("k_review"):
-            review = True
-            notes.append(f"k for {jur['label']} still to be confirmed with counsel")
 
         # Step 5: most restrictive wins
         outcome = hits[0].cap

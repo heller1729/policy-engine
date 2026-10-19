@@ -151,7 +151,7 @@ Confidence: Thailand is backed by a Tilleke & Gibbins legal review. All other co
 
 | Jurisdiction | Law | What matters for the engine |
 | :-- | :-- | :-- |
-| Thailand | PDPA B.E. 2562 (2019) | Ad and device IDs are personal data. Consent is the primary lawful basis. Extraterritorial via monitoring people in Thailand (answers the tourist question). No adequacy list, so SCCs, BCRs or consent for every transfer; strict intra group rules (Mar 2024). Criminal liability up to 1 year, admin fines up to THB 5M, civil damages up to 2x. DPO likely required. 72 hour breach notice. k to be set with counsel |
+| Thailand | PDPA B.E. 2562 (2019) | Ad and device IDs are personal data. Consent is the primary lawful basis. Extraterritorial via monitoring people in Thailand (answers the tourist question). No adequacy list, so SCCs, BCRs or consent for every transfer; strict intra group rules (Mar 2024). Criminal liability up to 1 year, admin fines up to THB 5M, civil damages up to 2x. DPO likely required. 72 hour breach notice. k = 5 like the baseline, adjustable per jurisdiction |
 | United States | CCPA/CPRA plus 20+ state laws | Ad ID is personal information. Precise geolocation is sensitive. Several states ban geofencing near healthcare or selling precise location. No GDPR style transfer limits |
 | Saudi Arabia | PDPL (enforced Sep 2024) | Explicitly covers visitors and tourists. Strictest on transfers: localization for sensitive and personal data, adequacy or SCCs plus risk assessment, national interest test |
 | UAE | Federal Decree Law 45 of 2021 | Ad ID is personal data. Explicit consent. Adequacy plus safeguards, list unpublished. Free zones (DIFC, ADGM) have own rules |
@@ -275,7 +275,7 @@ Stack: Python 3.11+, FastAPI, PyYAML, h3 (v4 API: `latlng_to_cell`, `cell_to_par
 * Step 2 audience matrix band for the tier and requester.
 * Step 3 jurisdiction rules whose `when` matches.
 * Step 4 purpose rules whose `when` matches. Purpose only tightens.
-* k from the jurisdiction (default 5). `k_review: true` flags review.
+* k from the jurisdiction (default 5). Each jurisdiction's `k` in policy.yaml is a plain adjustable number; the request builder's what if box can raise it for one request but never lower it. (The old `k_review` flag, which forced every Thailand request to review, was removed on Oct 19, 2026.)
 * Step 5 most restrictive cap wins. Every rule at that cap is a deciding rule.
 * Grey area: if any hit has `review: true`, Full or Masked becomes Aggregate and the request is flagged for human review.
 * Place check (PEP, before the plan, every non Blocked request): each row's group comes from the place catalog. For each group present, the PDP decides the same request with that group. Rows whose own group gets a stricter decision than the release (the outcome, or Aggregate for tiers 1 to 3) are withheld. The audit step `place_check` (factor B3) lists rows withheld per group with the cap and deciding rules. This makes most restrictive wins hold per row, not only per request.

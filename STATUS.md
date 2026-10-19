@@ -50,7 +50,6 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Product of axes model vs a single ordered scale for practical use.
 * Whether Group C stays a purchase time gate.
 * Whether contractual constraints (F) stay their own set.
-* Thailand k value, to be set with counsel.
 * Exact place lists per location group and per country shifts.
 * Place catalog buffer: 600 m for now. Needs a real number per group, and possibly per country.
 
@@ -96,7 +95,7 @@ Prototype v0.1 is working and was shown at the IAB meeting on Oct 8. v0.2 (API p
 * Asked: why only five cities. They mirror Phase I (Saudi Arabia, UAE, Qatar) and JICA Thailand. US, EU, UK and Japan exist as jurisdictions only; offered to add synthetic cities for them if wanted.
 * Added one city per remaining jurisdiction (New York, London, Paris, Tokyo) with mixed G1 to G5 places, from a separate random stream so the original rows are unchanged (checked by hash and a test). Six new scenarios (8 to 13) covering the US, UK, EU and Japan rules, the place check, and the first Full release. Area dropdown shows the country and offers the usual jurisdiction. 58 tests (29 engine, 29 API). Scenarios 1 to 7 output unchanged.
 * Step 4 done: Who sees what page (tier by requester grid after all rules, compare with another jurisdiction or with the audience matrix alone, differing cells outlined, cells open the request builder) and Policy page (location groups, audience matrix, jurisdiction overrides with conditions in plain words, purpose rules, techniques and plans, place catalog, factor glossary, search and factor chip filters). New `/api/catalog`. 59 tests (29 engine, 30 API). Checked in Chrome.
-* Noticed: Thailand shows Aggregate with review for every cell, including Lv 1 public, because `k_review: true` flags every Thailand request. Correct per policy, but worth raising once counsel sets the Thailand k.
+* Changed (Pratham's call): removed the Thailand "k to be set with counsel" flag everywhere (policy.yaml, engine, API, UI, CLAUDE.md, spreadsheet Regional overrides cell). Thailand k is now a plain adjustable number (5) like every other jurisdiction, and the builder's k box shows the jurisdiction's policy value. Effect: Thailand no longer forces every request to Aggregate with review; Lv 1 to 3 Thailand stats can be Full again, and only TH_ADID_DEVICE_LEVEL stays a grey area. Scenario 4 unchanged except the counsel note. 60 tests.
 * Next: step 5, audit log page, techniques page, present mode, Playwright smoke test, README update.
 
 ### Oct 6, 2026
