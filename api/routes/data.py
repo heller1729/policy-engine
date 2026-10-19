@@ -2,12 +2,13 @@ from collections import Counter, defaultdict
 
 from fastapi import APIRouter, Depends
 
+from ..schemas import DataSummaryOut
 from ..state import EngineState, get_state
 
 router = APIRouter(tags=["Synthetic data"])
 
 
-@router.get("/data/summary", response_model=dict)
+@router.get("/data/summary", response_model=DataSummaryOut)
 def summary(state: EngineState = Depends(get_state)):
     """Shape of the synthetic dataset. Counts only, no device rows."""
     rows = state.data

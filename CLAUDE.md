@@ -241,7 +241,8 @@ Matsuo praised the architecture and asked that it be flexible enough to select a
 | `scenarios.py` | The seven demo scenarios with expected outcomes, shared by demo, API and tests |
 | `demo.py` | Runs the scenarios. `--noise` turns on Laplace noise, `--only N` runs one |
 | `ask.py` | Single request from the command line, `--json` for the audit record |
-| `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`). Serves `web/dist` when built |
+| `api/` | FastAPI app (`main.py`, `schemas.py`, `state.py`, `routes/`, `export_openapi.py`). Serves `web/dist` when built, with client side routes falling back to index.html |
+| `web/` | React app (Vite, TypeScript 5.9, Tailwind 4, TanStack Query, openapi-fetch, lucide-react). `src/api/schema.d.ts` is generated from `web/openapi.json` by `npm run gen:api`; do not edit it by hand |
 | `serve.py` | Starts the API on http://localhost:8000 |
 | `tests/test_engine.py` | 22 engine tests |
 | `tests/test_api.py` | 22 API tests |
@@ -256,6 +257,7 @@ pip install -r requirements.txt
 python demo.py
 python -m pytest -q
 python serve.py              # API, docs at http://localhost:8000/docs
+cd web && npm install && npm run build && cd ..   # then python serve.py serves the app at /
 python ask.py --tier 6 --requester commercial --jurisdiction saudi_arabia --purpose advertising --group G1 --area Mecca
 ```
 
@@ -327,6 +329,8 @@ Columns: `device_id` (UUID v4 format, like an AAID), `home_country` (ISO3), `are
 22 tests: each scenario's decision, grey area handling, US and ads rules, Saudi group shift, unknown inputs, an exhaustive check over all 4,200 attribute combinations that the outcome is never looser than the strictest rule hit, suppression, masked output has no raw IDs or sensitive rows or hour, blocked releases nothing, audit record carries the reason, noise switches on from policy only, policy validation, unregistered technique error. Run tests before every commit. Keep the exhaustive test.
 
 API tests (`test_api.py`): every scenario through `/api/request`, `/api/decide` does not write the audit log, unknown attributes come back as Blocked not an HTTP error, the Mecca funnel 2373 to 65 to 56, masked responses have no raw IDs, `/api/matrix` agrees with the engine, overrides can raise k or add noise but never loosen, audit filter and export, data summary has no device IDs.
+
+Web app: only the request builder exists so far (step 2 of `docs/UI_Plan.md`). Request state lives in URL query params (`tier`, `requester`, `jurisdiction`, `purpose`, `group`, `area`, `k`, `noise`, `eps`) so other pages can link into it. Live preview calls `/api/decide` with a 150 ms debounce. Outcome colors: Full green, Masked sky blue, Aggregate amber, Blocked rose. Flow step colors follow the Whimsical board. TypeScript is pinned to 5.9 because TypeScript 7 drops the compiler API that `openapi-typescript` needs. Build the web app (`npm run build`) as the type check before committing web changes.
 
 Overrides (`Policy.with_overrides`): `noise`, `epsilon`, `k_min`. They only tighten and are recorded as `policy_overrides` in the audit record. `/api/decide` is for live preview and is not audited; `/api/request` is.
 

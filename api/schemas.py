@@ -113,3 +113,99 @@ class TechniqueOut(BaseModel):
     factor: Optional[str]
     description: str
     used_in: list[str] = Field(default_factory=list)
+
+
+class TierOut(BaseModel):
+    level: int
+    name: str
+    band: str
+    device_level: bool
+
+
+class LocationGroupOut(BaseModel):
+    id: str
+    name: str
+    device_level: str
+    aggregate: str
+    factor: Optional[str]
+    citation: str
+
+
+class RuleOut(BaseModel):
+    id: str
+    when: dict = Field(default_factory=dict)
+    cap: str
+    review: bool = False
+    factor: Optional[str] = None
+    citation: str
+
+
+class JurisdictionOut(BaseModel):
+    id: str
+    label: str
+    k: int
+    k_review: bool = False
+    group_shift: dict[str, str] = Field(default_factory=dict)
+    rules: list[RuleOut] = Field(default_factory=list)
+
+
+class AudienceBandOut(BaseModel):
+    tiers: list[int]
+    label: str
+    cells: dict[str, str]
+
+
+class AudienceMatrixOut(BaseModel):
+    factor: Optional[str]
+    citation: str
+    bands: list[AudienceBandOut]
+
+
+class TechniquesConfigOut(BaseModel):
+    plans: dict[str, list[str]]
+    aggregate_product_plan: list[str]
+    optional: dict[str, dict] = Field(default_factory=dict)
+    settings: dict = Field(default_factory=dict)
+
+
+class PolicyOut(BaseModel):
+    version: Optional[str]
+    decisions: list[str]
+    device_level_from_tier: int
+    tiers: list[TierOut]
+    requesters: list[str]
+    purposes: list[str]
+    thresholds: dict[str, int]
+    location_groups: list[LocationGroupOut]
+    audience_matrix: AudienceMatrixOut
+    jurisdictions: list[JurisdictionOut]
+    purpose_rules: list[RuleOut]
+    techniques: TechniquesConfigOut
+
+
+class AuditListOut(BaseModel):
+    total: int
+    records: list[dict]
+
+
+class PlaceOut(BaseModel):
+    place: str
+    group: str
+    rows: int
+
+
+class AreaSummaryOut(BaseModel):
+    area: str
+    rows: int
+    devices: int
+    center: list[float]
+    places: list[PlaceOut]
+    home_countries: dict[str, int]
+
+
+class DataSummaryOut(BaseModel):
+    synthetic: bool
+    rows: int
+    devices: int
+    dates: list[str]
+    areas: list[AreaSummaryOut]

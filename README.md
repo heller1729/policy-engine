@@ -25,6 +25,22 @@ python ask.py --tier 6 --requester commercial --jurisdiction saudi_arabia \
 
 Add `--json` to print the full audit record. Every request is also appended to `out/audit.jsonl`.
 
+## Web app
+
+Needs Node 20 or newer. Build once, then `python serve.py` serves the app at http://localhost:8000.
+
+```
+cd web
+npm install
+npm run build
+cd ..
+python serve.py
+```
+
+For development, run `python serve.py` in one terminal and `npm run dev` inside `web` in another, then open http://localhost:5173 (it forwards `/api` to port 8000). After changing an API response model, run `npm run gen:api` inside `web` to regenerate the TypeScript types.
+
+The request builder keeps the request in the URL, so a link such as `/?tier=5&requester=commercial&jurisdiction=thailand&purpose=advertising&group=G5&area=Bangkok` opens that exact case.
+
 ## How the code maps to the diagram
 
 | Diagram | Code |

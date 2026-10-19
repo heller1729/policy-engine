@@ -1,0 +1,38 @@
+export const FACTORS: Record<string, string> = {
+  A1: "Direct identifier present",
+  A2: "Persistent device or ad ID",
+  A3: "Rotating or short lived ID",
+  A4: "Quasi identifiers combined",
+  A5: "Internal reidentification key exists",
+  A6: "External matching possible",
+  B1: "Special category content",
+  B2: "Sensitive attribute inferable",
+  B3: "Sensitive facility visit",
+  B4: "Cultural or contextual sensitivity",
+  B5: "Home or workplace inferable",
+  C1: "No consent",
+  C2: "No transparency or notice",
+  C3: "Inference without the subject's knowledge",
+  C4: "No objection or withdrawal",
+  D1: "Third party disclosure",
+  D2: "Cross border transfer",
+  D3: "Purpose or context of use",
+  E1: "Spatial aggregation",
+  E2: "Temporal aggregation",
+  E3: "k anonymity threshold",
+  E4: "Statistical aggregation",
+  E5: "Differential privacy",
+  E6: "Unit of privacy",
+  F1: "No identification of individuals",
+  F2: "No resale",
+  F3: "Deletion and subscription terms",
+  G1: "Directly revealing location",
+  G2: "Revealing by inference",
+  G3: "Vulnerable population present",
+  G4: "Security sensitive location",
+  G5: "Everyday place",
+};
+
+export function splitFactors(factor: string | null | undefined): string[] {
+  return (factor ?? "").split(",").map((f) => f.trim()).filter(Boolean);
+}

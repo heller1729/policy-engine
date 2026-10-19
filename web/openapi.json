@@ -1,0 +1,1519 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Geolocation Privacy Policy Engine",
+    "description": "Synthetic data only. Decisions follow policy/policy.yaml.",
+    "version": "0.2"
+  },
+  "paths": {
+    "/api/policy": {
+      "get": {
+        "tags": [
+          "Policy"
+        ],
+        "summary": "Policy",
+        "operationId": "policy_api_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/techniques": {
+      "get": {
+        "tags": [
+          "Policy"
+        ],
+        "summary": "Technique List",
+        "operationId": "technique_list_api_techniques_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TechniqueOut"
+                  },
+                  "type": "array",
+                  "title": "Response Technique List Api Techniques Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scenarios": {
+      "get": {
+        "tags": [
+          "Scenarios"
+        ],
+        "summary": "Scenarios",
+        "operationId": "scenarios_api_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScenarioOut"
+                  },
+                  "type": "array",
+                  "title": "Response Scenarios Api Scenarios Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/decide": {
+      "post": {
+        "tags": [
+          "Decide and run"
+        ],
+        "summary": "Decide",
+        "description": "Decision only. Nothing is read from the data and nothing is written to the audit log.",
+        "operationId": "decide_api_decide_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/request": {
+      "post": {
+        "tags": [
+          "Decide and run"
+        ],
+        "summary": "Run Request",
+        "operationId": "run_request_api_request_post",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/matrix": {
+      "post": {
+        "tags": [
+          "Who sees what"
+        ],
+        "summary": "Matrix",
+        "description": "Outcome for every tier and requester after all rules apply, not the raw audience matrix.",
+        "operationId": "matrix_api_matrix_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatrixOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "tags": [
+          "Audit log"
+        ],
+        "summary": "Audit",
+        "description": "Records written since the server started, newest first.",
+        "operationId": "audit_api_audit_get",
+        "parameters": [
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome"
+            }
+          },
+          {
+            "name": "review",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Review"
+            }
+          },
+          {
+            "name": "jurisdiction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Jurisdiction"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5000,
+              "minimum": 1,
+              "default": 200,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit/export": {
+      "get": {
+        "tags": [
+          "Audit log"
+        ],
+        "summary": "Export",
+        "operationId": "export_api_audit_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit/{request_id}": {
+      "get": {
+        "tags": [
+          "Audit log"
+        ],
+        "summary": "Audit Record",
+        "operationId": "audit_record_api_audit__request_id__get",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Audit Record Api Audit  Request Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/summary": {
+      "get": {
+        "tags": [
+          "Synthetic data"
+        ],
+        "summary": "Summary",
+        "description": "Shape of the synthetic dataset. Counts only, no device rows.",
+        "operationId": "summary_api_data_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataSummaryOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AreaSummaryOut": {
+        "properties": {
+          "area": {
+            "type": "string",
+            "title": "Area"
+          },
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          },
+          "devices": {
+            "type": "integer",
+            "title": "Devices"
+          },
+          "center": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Center"
+          },
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/PlaceOut"
+            },
+            "type": "array",
+            "title": "Places"
+          },
+          "home_countries": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Home Countries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "area",
+          "rows",
+          "devices",
+          "center",
+          "places",
+          "home_countries"
+        ],
+        "title": "AreaSummaryOut"
+      },
+      "AudienceBandOut": {
+        "properties": {
+          "tiers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Tiers"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "cells": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Cells"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tiers",
+          "label",
+          "cells"
+        ],
+        "title": "AudienceBandOut"
+      },
+      "AudienceMatrixOut": {
+        "properties": {
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          },
+          "bands": {
+            "items": {
+              "$ref": "#/components/schemas/AudienceBandOut"
+            },
+            "type": "array",
+            "title": "Bands"
+          }
+        },
+        "type": "object",
+        "required": [
+          "factor",
+          "citation",
+          "bands"
+        ],
+        "title": "AudienceMatrixOut"
+      },
+      "AuditListOut": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "records"
+        ],
+        "title": "AuditListOut"
+      },
+      "CellCount": {
+        "properties": {
+          "cell": {
+            "type": "string",
+            "title": "Cell"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cell",
+          "count"
+        ],
+        "title": "CellCount"
+      },
+      "DataSummaryOut": {
+        "properties": {
+          "synthetic": {
+            "type": "boolean",
+            "title": "Synthetic"
+          },
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          },
+          "devices": {
+            "type": "integer",
+            "title": "Devices"
+          },
+          "dates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Dates"
+          },
+          "areas": {
+            "items": {
+              "$ref": "#/components/schemas/AreaSummaryOut"
+            },
+            "type": "array",
+            "title": "Areas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "synthetic",
+          "rows",
+          "devices",
+          "dates",
+          "areas"
+        ],
+        "title": "DataSummaryOut"
+      },
+      "DecisionOut": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "review": {
+            "type": "boolean",
+            "title": "Review"
+          },
+          "k": {
+            "type": "integer",
+            "title": "K"
+          },
+          "plan": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Plan"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/RuleHitOut"
+            },
+            "type": "array",
+            "title": "Hits"
+          },
+          "deciding_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Deciding Rules"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "outcome",
+          "review",
+          "k",
+          "plan",
+          "hits",
+          "deciding_rules",
+          "notes"
+        ],
+        "title": "DecisionOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "JurisdictionOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "k": {
+            "type": "integer",
+            "title": "K"
+          },
+          "k_review": {
+            "type": "boolean",
+            "title": "K Review",
+            "default": false
+          },
+          "group_shift": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Group Shift"
+          },
+          "rules": {
+            "items": {
+              "$ref": "#/components/schemas/RuleOut"
+            },
+            "type": "array",
+            "title": "Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "k"
+        ],
+        "title": "JurisdictionOut"
+      },
+      "LocationGroupOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "device_level": {
+            "type": "string",
+            "title": "Device Level"
+          },
+          "aggregate": {
+            "type": "string",
+            "title": "Aggregate"
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "device_level",
+          "aggregate",
+          "factor",
+          "citation"
+        ],
+        "title": "LocationGroupOut"
+      },
+      "MapOut": {
+        "properties": {
+          "released_kind": {
+            "type": "string",
+            "enum": [
+              "none",
+              "device_rows",
+              "unique_devices"
+            ],
+            "title": "Released Kind"
+          },
+          "input": {
+            "items": {
+              "$ref": "#/components/schemas/CellCount"
+            },
+            "type": "array",
+            "title": "Input"
+          },
+          "released": {
+            "items": {
+              "$ref": "#/components/schemas/CellCount"
+            },
+            "type": "array",
+            "title": "Released"
+          },
+          "suppressed": {
+            "items": {
+              "$ref": "#/components/schemas/CellCount"
+            },
+            "type": "array",
+            "title": "Suppressed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "released_kind",
+          "input",
+          "released",
+          "suppressed"
+        ],
+        "title": "MapOut"
+      },
+      "MatrixCell": {
+        "properties": {
+          "tier": {
+            "type": "integer",
+            "title": "Tier"
+          },
+          "requester": {
+            "type": "string",
+            "title": "Requester"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "review": {
+            "type": "boolean",
+            "title": "Review"
+          },
+          "deciding_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Deciding Rules"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tier",
+          "requester",
+          "outcome",
+          "review",
+          "deciding_rules"
+        ],
+        "title": "MatrixCell"
+      },
+      "MatrixIn": {
+        "properties": {
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose"
+          },
+          "location_group": {
+            "type": "string",
+            "title": "Location Group"
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Overrides"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "jurisdiction",
+          "purpose",
+          "location_group"
+        ],
+        "title": "MatrixIn"
+      },
+      "MatrixOut": {
+        "properties": {
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose"
+          },
+          "location_group": {
+            "type": "string",
+            "title": "Location Group"
+          },
+          "tiers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Tiers"
+          },
+          "requesters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requesters"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/MatrixCell"
+            },
+            "type": "array",
+            "title": "Cells"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jurisdiction",
+          "purpose",
+          "location_group",
+          "tiers",
+          "requesters",
+          "cells"
+        ],
+        "title": "MatrixOut"
+      },
+      "Overrides": {
+        "properties": {
+          "noise": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Noise"
+          },
+          "epsilon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epsilon"
+          },
+          "k_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "K Min"
+          }
+        },
+        "type": "object",
+        "title": "Overrides"
+      },
+      "PlaceOut": {
+        "properties": {
+          "place": {
+            "type": "string",
+            "title": "Place"
+          },
+          "group": {
+            "type": "string",
+            "title": "Group"
+          },
+          "rows": {
+            "type": "integer",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "place",
+          "group",
+          "rows"
+        ],
+        "title": "PlaceOut"
+      },
+      "PolicyOut": {
+        "properties": {
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "decisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Decisions"
+          },
+          "device_level_from_tier": {
+            "type": "integer",
+            "title": "Device Level From Tier"
+          },
+          "tiers": {
+            "items": {
+              "$ref": "#/components/schemas/TierOut"
+            },
+            "type": "array",
+            "title": "Tiers"
+          },
+          "requesters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requesters"
+          },
+          "purposes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Purposes"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Thresholds"
+          },
+          "location_groups": {
+            "items": {
+              "$ref": "#/components/schemas/LocationGroupOut"
+            },
+            "type": "array",
+            "title": "Location Groups"
+          },
+          "audience_matrix": {
+            "$ref": "#/components/schemas/AudienceMatrixOut"
+          },
+          "jurisdictions": {
+            "items": {
+              "$ref": "#/components/schemas/JurisdictionOut"
+            },
+            "type": "array",
+            "title": "Jurisdictions"
+          },
+          "purpose_rules": {
+            "items": {
+              "$ref": "#/components/schemas/RuleOut"
+            },
+            "type": "array",
+            "title": "Purpose Rules"
+          },
+          "techniques": {
+            "$ref": "#/components/schemas/TechniquesConfigOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "decisions",
+          "device_level_from_tier",
+          "tiers",
+          "requesters",
+          "purposes",
+          "thresholds",
+          "location_groups",
+          "audience_matrix",
+          "jurisdictions",
+          "purpose_rules",
+          "techniques"
+        ],
+        "title": "PolicyOut"
+      },
+      "ReleasedPage": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "rows"
+        ],
+        "title": "ReleasedPage"
+      },
+      "RequestIn": {
+        "properties": {
+          "data_tier": {
+            "type": "integer",
+            "title": "Data Tier"
+          },
+          "requester": {
+            "type": "string",
+            "title": "Requester"
+          },
+          "jurisdiction": {
+            "type": "string",
+            "title": "Jurisdiction"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose"
+          },
+          "location_group": {
+            "type": "string",
+            "title": "Location Group"
+          },
+          "area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area"
+          },
+          "overrides": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Overrides"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_tier",
+          "requester",
+          "jurisdiction",
+          "purpose",
+          "location_group"
+        ],
+        "title": "RequestIn"
+      },
+      "RuleHitOut": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "cap": {
+            "type": "string",
+            "title": "Cap"
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          },
+          "review": {
+            "type": "boolean",
+            "title": "Review"
+          },
+          "deciding": {
+            "type": "boolean",
+            "title": "Deciding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "rule_id",
+          "cap",
+          "factor",
+          "citation",
+          "review",
+          "deciding"
+        ],
+        "title": "RuleHitOut"
+      },
+      "RuleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "when": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "When"
+          },
+          "cap": {
+            "type": "string",
+            "title": "Cap"
+          },
+          "review": {
+            "type": "boolean",
+            "title": "Review",
+            "default": false
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "cap",
+          "citation"
+        ],
+        "title": "RuleOut"
+      },
+      "RunOut": {
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/DecisionOut"
+          },
+          "rows_in": {
+            "type": "integer",
+            "title": "Rows In"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepOut"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "released": {
+            "$ref": "#/components/schemas/ReleasedPage"
+          },
+          "map": {
+            "$ref": "#/components/schemas/MapOut"
+          },
+          "audit": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Audit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "rows_in",
+          "steps",
+          "released",
+          "map",
+          "audit"
+        ],
+        "title": "RunOut"
+      },
+      "ScenarioOut": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "attributes": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Attributes"
+          },
+          "expected": {
+            "type": "string",
+            "title": "Expected"
+          },
+          "expected_review": {
+            "type": "boolean",
+            "title": "Expected Review"
+          },
+          "why": {
+            "type": "string",
+            "title": "Why"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "title",
+          "attributes",
+          "expected",
+          "expected_review",
+          "why"
+        ],
+        "title": "ScenarioOut"
+      },
+      "StepOut": {
+        "properties": {
+          "technique": {
+            "type": "string",
+            "title": "Technique"
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "rows_in": {
+            "type": "integer",
+            "title": "Rows In"
+          },
+          "rows_out": {
+            "type": "integer",
+            "title": "Rows Out"
+          }
+        },
+        "type": "object",
+        "required": [
+          "technique",
+          "factor",
+          "rows_in",
+          "rows_out"
+        ],
+        "title": "StepOut"
+      },
+      "TechniqueOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "factor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factor"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "used_in": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Used In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "factor",
+          "description"
+        ],
+        "title": "TechniqueOut"
+      },
+      "TechniquesConfigOut": {
+        "properties": {
+          "plans": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Plans"
+          },
+          "aggregate_product_plan": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Aggregate Product Plan"
+          },
+          "optional": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Optional"
+          },
+          "settings": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Settings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plans",
+          "aggregate_product_plan"
+        ],
+        "title": "TechniquesConfigOut"
+      },
+      "TierOut": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "band": {
+            "type": "string",
+            "title": "Band"
+          },
+          "device_level": {
+            "type": "boolean",
+            "title": "Device Level"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "name",
+          "band",
+          "device_level"
+        ],
+        "title": "TierOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
