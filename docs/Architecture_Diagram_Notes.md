@@ -1,32 +1,44 @@
-# Architecture Diagram: Speaking Notes
+# Architecture Diagram: Speaking Notes (v0.2)
 
 Board: https://whimsical.com/privacy-policy-engine-architecture-Bv4NgN4RPaeXwPgt8gqTsz
 
 ## Opening
 
-So far we've built the framework. We know how sensitive the data is, where it's being used, and who is allowed to see it. This diagram is the next step. It shows how a system would actually use all of that to answer one data request.
+So far we've built the framework. We know how sensitive the data is, where it's being used, and who is allowed to see it. This diagram shows how the system uses all of that to answer one data request.
 
 The short version is this. A request comes in, the system checks it against our rules, picks one decision, and then changes the data to match that decision before anything goes out.
 
+This version of the board matches the code as it is now, which is v0.2. The prototype has a web app on top of it, so everything I'm showing here can also be clicked through live.
+
 ## Layout of the board
 
-Before the steps, a quick look at where things are. There are four big areas. The gray area on the top left is the policy, so our rules. The pink area on the top right is where the decision gets made. The blue area on the bottom left is the input. And the mint area along the bottom middle is where the data actually gets changed.
+Before the steps, a quick look at where things are. The gray area on the top left is the policy, so our rules. The pink area on the top right is where the decision gets made. The blue area on the left is the input. And the mint area in the middle is where the data actually gets changed.
 
-The main boxes are labeled Step 1 to Step 7, so you can just follow those. The legend is under the diagram, on the bottom left.
+The main boxes are labeled Step 1 to Step 7, so you can just follow those. The legend is under the diagram.
 
 ## The colors and lines
 
-Quickly on the legend. Blue is what comes in and what goes out. Gray is the policy. Pink is where the decision gets made. Orange is the gatekeeper. Mint is what we do to the data. And yellow is something we're planning for later, not the first version.
+Quickly on the colors. Blue is what comes in, the data we run on, and what goes out. Gray is the policy. Pink is where the decision gets made. Orange is the gatekeeper. Mint is what we do to the data. And yellow is something we're planning for later.
 
-Solid arrows mean the request or the data moves to the next step. The dashed arrow means later. And the words on some arrows say what's being passed along.
+Solid arrows mean the request or the data moves to the next step. A dashed arrow means it's optional or planned for later. The words on some arrows say what's being passed along, or which path the data takes.
+
+## Ways in
+
+Start at the bottom left, the blue box called Ways in. There are three ways to send a request today. The web app, the API behind it, and the command line.
+
+The web app has a few pages. A request builder, a who sees what page, a page that shows the whole policy, a page that shows each technique on sample rows, the audit log, and a present mode for meetings like this one.
+
+All three end up in the same place. The arrow labeled "sends" goes up to Step 1.
 
 ## Step 1: the request
 
-Start on the bottom left, in the blue Input area. A data request comes in, and the arrow labeled "carries" goes to the box next to it, which lists the five things every request carries.
+Step 1 is the data request. The arrow labeled "carries" goes to the box next to it, which lists what every request carries.
 
-The data tier, which is Riki's level 1 to 7. Who is asking, so public, commercial, internal, government, or research. Which country. What it's for, like tourism or advertising. And which location group it touches, G1 to G5.
+The data tier, which is Riki's level 1 to 7. Who is asking, so public, commercial, internal, government, or research. Which country's rules apply. What it's for, like tourism or advertising. Which location group it touches, G1 to G5. And which area, like Mecca or Dubai.
 
-Those five things are all the system needs to make a decision. And each one comes from something we already built. The tiers are Riki's framework. The requester types are from the who sees what proposal. The countries, purposes, and location groups are all tabs in the regional spreadsheet.
+There's also an optional what if. Someone can raise k or switch on noise for one request. But they can only make it stricter, never looser.
+
+Each of these comes from something we already built. The tiers are Riki's framework. The requester types are from the who sees what proposal. The countries, purposes, and location groups are all tabs in the regional spreadsheet.
 
 ## Step 2: the enforcement point
 
@@ -34,15 +46,23 @@ Follow the arrow right, into the mint area. The first box there is orange. That'
 
 The request doesn't go straight to the data. It hits this box first. Its job is to stop every request and ask, is this allowed, and in what form.
 
+Two other things feed into it from below. The blue cylinder is the data. Right now it's synthetic data for nine cities, one or more for each of our eight jurisdictions. The arrow says "rows for the area", so the enforcement point only pulls the rows for the area that was asked for. Real Irys data in Snowflake would plug in here later.
+
 ## Step 3: the decision point
 
-From the orange box, there's a long arrow labeled "asks for decision" going up to the top right. That lands on Step 3, the decision point, the first box in the pink area. It reads the rules and gives back one answer.
+From the orange box, an arrow goes up to the pill that says "asks for decision". From there the line runs across to the dot and up into Step 3, the decision point. That's the first box in the pink area.
 
-Now look at the top left, the gray area. That's where the rules come from. On the far left is the policy file. It's a YAML file generated from the spreadsheet. It feeds four rule sets, the four boxes next to it. What each location group allows. Country overrides for the eight places. The audience matrix, so who sees what. And the thresholds, where k is 5 by default but a country can raise it.
+The decision point does three things.
 
-Each of those four boxes has a long arrow going across to the decision point. That's the decision point reading all four rule sets.
+First, it checks the input. If any value is one it doesn't know, like a country we have no rules for, the answer is Blocked right away. So the system fails safe.
 
-The important point here is that the rules are data, not code. So if Thailand changes a rule, we edit the spreadsheet, not the program.
+Second, it applies the group shift. In Saudi Arabia and Thailand, G2 religious places get treated as G1.
+
+Third, it reads the rules. Look at the top left, the gray area. The policy file is on the left. It's a YAML file, written from the regional spreadsheet. It holds the rule sets on the right. What each location group allows. Overrides for the eight jurisdictions. The audience matrix, so who sees what. Purpose rules, like no ad targeting at sensitive places. And the thresholds, which is k, 5 by default and set per jurisdiction, plus the noise setting.
+
+There's one arrow from the policy area to the decision point, labeled "reads all rule sets". That's all of them going in together.
+
+The important point here is that the rules are data, not code. If Thailand changes a rule, we edit the policy file, not the program.
 
 This split between a decision point and an enforcement point isn't something we made up. It's the standard setup from NIST SP 800-162, which is NIST's guide to attribute based access control.
 
@@ -50,44 +70,62 @@ This split between a decision point and an enforcement point isn't something we 
 
 Back in the pink area, the arrow labeled "if rules disagree" goes to Step 4, the conflict rule.
 
-Sometimes two rules will say different things. Say the audience matrix allows aggregates but the country rule says block. Our rule is simple. The most restrictive one wins.
+Sometimes two rules say different things. Say the audience matrix allows aggregates but a country rule says block. Our rule is simple. The most restrictive one wins.
 
-That also means if a rule is missing or unclear, the answer can only get stricter, never looser. So the system fails safe.
+That also means a rule can only ever make the answer stricter. Never looser.
 
 ## Step 5: the decision and the audit log
 
-Next is Step 5, the decision. It's one of four. Full, meaning release it as asked. Aggregate, meaning counts only, and only where there are at least k devices. Masked, meaning IDs are hashed and sensitive rows are taken out. Or Blocked, meaning nothing goes out.
+Next is Step 5, the decision. It's one of four. Full means release it as asked. Masked means device rows, but with IDs hashed and sensitive rows taken out. Aggregate means counts only, and only where there are at least k devices. Blocked means nothing goes out.
 
-These line up with our Safe, Mask, and Out logic from earlier.
+There's also the grey area case. Some rules are marked for human review, like the Thailand rule on ad IDs. When one of those fires, a Full or Masked answer becomes Aggregate, and the request gets flagged for review.
 
-The arrow labeled "records why" goes to the last box on the right, the audit log. It records which rule fired, the factor ID, like A2 or E3 or G1, and the source behind it, like GDPR Article 9. So if anyone asks why something was blocked, we can point to the exact rule and the law behind it.
+The arrow labeled "records why" goes to the audit log on the right. It records every rule that fired, the factor ID, like A2 or E3 or G1, the source behind it, like GDPR Article 9, and how many rows went in and came out. So if anyone asks why something was blocked, we can point to the exact rule and the law behind it.
 
-## Step 6: the transform steps
+Below Step 5 there's the yellow box, with a dashed arrow labeled "later". I'll come back to that at the end.
 
-From the decision, there's a long arrow labeled "returns decision". It goes around the right side and along the bottom, back to the orange enforcement point. So the answer goes back to the gatekeeper.
+## Step 6: the place check
 
-Now the gatekeeper applies it. The data runs through the row of mint boxes, left to right. Step 6 marks the first one.
+From the decision, the long arrow labeled "returns decision" goes around the right side and along the bottom, back to the orange enforcement point. So the answer goes back to the gatekeeper.
 
-First we hash the ad IDs. That's factor A2, the persistent ID problem.
+Now the gatekeeper applies it. The first mint box is Step 6, the place check. This is new since the last version.
 
-Then we drop device level rows at G1 and G2 places. So things like religious sites and clinics. That's B2 and B3.
+The problem it solves is this. A request says one location group, like G5, everyday places. But the rows in that area might include a hospital or a mosque. So the place check looks at every row on its own. The gray box below it is the place catalog. It's a list of sensitive places with their coordinates and a buffer around each one. The arrow says "row groups", so each row gets its own location group from where it actually is.
 
-Then we roll everything up into counts per H3 cell. H3 is just a hexagon grid for counting devices by area. That's E1 and E4.
+Then for each group, it asks the decision point again. Any rows that deserve a stricter answer than the request got are held back. So most restrictive wins applies to every row, not just to the request as a whole.
 
-Last, we remove any cell with fewer than k devices. A count of one is a person, so those cells never go out. That's E3.
+## The two plans
+
+After the place check, the data splits into one of two plans, depending on the decision.
+
+The top row is the Masked plan. First we hash the ad IDs with a secret key. That's factor A2, the persistent ID problem. Then we drop any rows at G1 to G4 places. That's B2 and B3, and it's a backup to the place check. Then we coarsen the time by dropping the hour. That's E2, which Deepanshu raised.
+
+The bottom row is the Aggregate plan. First we roll everything up into counts per H3 cell. H3 is just a hexagon grid for counting devices by area. That's E1 and E4. Then we remove any cell with fewer than k devices. A count of one is a person, so those cells never go out. That's E3.
+
+The last box on that row has a dashed border. That's Laplace noise, which is differential privacy. It's built now, but it's off by default and switched on in the policy file. That's why the arrow into it says "if on".
+
+One more detail. Any request for tier 1 to 3 always runs the Aggregate plan, even if the decision is Full, because those are aggregate products by definition. And if the decision is Blocked, no plan runs at all.
 
 ## Step 7: the output
 
-The arrow out of the last mint box goes to Step 7, the blue box on the right. Whatever survives those four steps is what gets released.
-
-## The yellow box
-
-One more box. Above the Input area there's a yellow box for differential privacy, with a dashed arrow labeled "later" going to the suppression step. It's dashed because it's not in the first version. When we add it, it would sit at that step and add noise to the counts. That needs its own design work against NIST SP 800-226.
+Both rows end at Step 7, the blue box on the right. Whatever survives those steps is what gets released.
 
 ## Quick example
 
-If it helps to make it concrete, take the Mecca case from Phase I. A commercial client asks for device level visits to Mecca for advertising. That's G1. The G1 rule blocks it right away. The audience matrix and the Saudi rules agree, so there's no conflict. The answer is Blocked, and the audit log cites GDPR Article 9 and the Saudi PDPL.
+Take the Mecca case from Phase I. A commercial client asks for tier 6 device level data in Mecca for advertising. That's G1.
+
+Three rules all say Blocked. The G1 location rule, the audience matrix, and the purpose rule that says no ad targeting at religious or medical sites. The Saudi localization rule on its own would only cap it at Aggregate, but most restrictive wins, so the answer is Blocked. The audit log cites GDPR Article 9 and the Saudi PDPL for the G1 rule, plus the who sees what proposal and the Ad ID tab.
+
+A second example shows the place check. A commercial advertiser in Dubai asks for tier 5 data at everyday places. The decision is Masked. But the synthetic Dubai data includes rows at a hospital. The place check holds those back, so 1,702 rows go in and 854 come out, with IDs hashed and the hour dropped.
+
+## The yellow box and what's next
+
+Back to the yellow box under Step 5. That's technique profiles, and it's what we're working on next, based on Dr. Matsuo's feedback.
+
+Right now the decision only says how much gets released. The next step is for it to also say how the work gets done. For example, private set intersection, so a buyer can learn how many of its customers are in our data without either side handing over its list. Or encrypted search, where the data stays encrypted and a key only opens what the policy allows. Or user level differential privacy, which protects a whole device instead of single events.
+
+These would be chosen per jurisdiction, requester, and purpose, which is why the arrow goes into the decision.
 
 ## Closing
 
-So that's the whole flow. Request in, check the rules, one decision, change the data, release. The next step would be a small Python prototype that runs this on synthetic data, so we can show the Mecca case being blocked without needing database access.
+So that's the whole flow. Request in, check the rules, one decision, a place check on every row, change the data, release. All of it runs today on synthetic data in the prototype, and I can show any of these cases live in the web app.
