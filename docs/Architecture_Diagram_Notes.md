@@ -16,6 +16,51 @@ Before the steps, a quick look at where things are. The gray area on the top lef
 
 The main boxes are labeled Step 1 to Step 7, so you can just follow those. The legend is under the diagram.
 
+## Quick overview (if we're short on time)
+
+Here's the whole thing in a minute.
+
+A request comes in from the web app, the API, or the command line. It says what tier of data, who is asking, which country, what it's for, which kind of place, and which area.
+
+It goes to the enforcement point first, which asks the decision point what to do. The decision point checks the request against our rules. Those are location group rules, country rules, the who sees what matrix, purpose rules, and k. If two rules disagree, the stricter one wins. The answer is one of four: Full, Masked, Aggregate, or Blocked. The audit log records which rules fired and why.
+
+Then the enforcement point applies it. First it checks every row against a list of sensitive places, and holds back rows that deserve a stricter answer. Then it runs either the Masked steps, which hash the IDs, drop sensitive rows, and remove the hour, or the Aggregate steps, which count devices per hex cell and remove any cell under k. Whatever is left is released.
+
+The rules live in a file, not in the code, so a country change means editing the file. Next we're adding technique profiles, so the decision can also pick methods like private set intersection or encrypted search.
+
+## Questions for LocationMind about building this into their systems
+
+If we want to develop this further and run it on their side, these are the things I'd want to ask.
+
+**Where it runs**
+
+1. Where would this run on your side? Your own servers, a cloud account, or next to Snowflake?
+2. Are there any rules about where the data and the engine have to be hosted, for example data staying in Japan or in a certain region?
+3. Is a Docker image the easiest way for your team to run it, or do you have a standard setup we should match?
+
+**Data**
+
+4. Can we get read access to the Snowflake schemas and a few sample rows, so we can test on real column names before touching real data?
+5. Do you have a list of sensitive places we can use instead of our synthetic one? Is it points, polygons, or H3 cells?
+6. Roughly how big is a typical request? Thousands of rows, millions, or more? And do requests need an answer right away, or can they run as batch jobs?
+
+**How requests come in**
+
+7. How do clients ask for data today? Through an API, a dashboard, or by talking to your team?
+8. How would the engine know who is asking? Do you have accounts or roles we can read the requester type from?
+
+**Rules and ownership**
+
+9. Who on your side would own the policy file and keep the country rules up to date?
+10. Is k = 5 still right for every country, or do some need a higher number?
+11. When a request is flagged for review, who should look at it, and how should they get notified?
+12. Where should the audit log be stored, and who needs to read it? Your team, clients, or regulators?
+
+**Next steps**
+
+13. Which use case should we pilot first? Tourism seems safest since it's mostly aggregate data.
+14. Who would be our main technical contact for this, and how often should we meet?
+
 ## The colors and lines
 
 Quickly on the colors. Blue is what comes in, the data we run on, and what goes out. Gray is the policy. Pink is where the decision gets made. Orange is the gatekeeper. Mint is what we do to the data. And yellow is something we're planning for later.
